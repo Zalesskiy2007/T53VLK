@@ -1,0 +1,207 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Исходные файлы">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Файлы заголовков">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Файлы ресурсов">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Исходные файлы\Math">
+      <UniqueIdentifier>{5b70db4d-2167-4950-81bd-53784658da38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Stock">
+      <UniqueIdentifier>{07fe0116-8b9d-4e96-98f6-407db30879d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Win">
+      <UniqueIdentifier>{cec3d3f6-8d7c-46b7-b2a4-03093120fddb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Anim">
+      <UniqueIdentifier>{9f465007-5ce9-40e0-8235-d829842bbc55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Anim\Render">
+      <UniqueIdentifier>{014edd11-639f-41bd-b55b-7356f33ac980}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Anim\Render\Res">
+      <UniqueIdentifier>{5f76e6cb-6961-4fda-a77e-620d88d2e2a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Anim\Input">
+      <UniqueIdentifier>{329eb020-3971-4fb6-99bd-45f5fa44b117}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Units">
+      <UniqueIdentifier>{060f1d63-d47e-472b-9d5b-240a52ca8684}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\XML">
+      <UniqueIdentifier>{10eeac2e-3655-4d1d-b559-04a19ce85ca0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\XML\Parse/Scan">
+      <UniqueIdentifier>{d9621ac5-7335-496f-bb3c-6e324a90e31f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\def.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mzgl.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="src\win\win.h">
+      <Filter>Исходные файлы\Win</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mth\mth.h">
+      <Filter>Исходные файлы\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mth\mth_camera.h">
+      <Filter>Исходные файлы\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mth\mth_def.h">
+      <Filter>Исходные файлы\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mth\mth_matr.h">
+      <Filter>Исходные файлы\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mth\mth_ray.h">
+      <Filter>Исходные файлы\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mth\mth_vec2.h">
+      <Filter>Исходные файлы\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mth\mth_vec3.h">
+      <Filter>Исходные файлы\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mth\mth_vec4.h">
+      <Filter>Исходные файлы\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stock\stock.h">
+      <Filter>Исходные файлы\Stock</Filter>
+    </ClInclude>
+    <ClInclude Include="src\anim\anim.h">
+      <Filter>Исходные файлы\Anim</Filter>
+    </ClInclude>
+    <ClInclude Include="src\anim\input\input.h">
+      <Filter>Исходные файлы\Anim\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\anim\input\timer.h">
+      <Filter>Исходные файлы\Anim\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\anim\rnd\render.h">
+      <Filter>Исходные файлы\Anim\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\anim\rnd\res\res_manager.h">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClInclude>
+    <ClInclude Include="src\anim\rnd\res\material.h">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClInclude>
+    <ClInclude Include="src\anim\rnd\res\mtl_pattern.h">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClInclude>
+    <ClInclude Include="src\anim\rnd\res\primitives.h">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClInclude>
+    <ClInclude Include="src\anim\rnd\res\shader.h">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClInclude>
+    <ClInclude Include="src\anim\rnd\res\topology.h">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClInclude>
+    <ClInclude Include="src\anim\rnd\res\texture.h">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClInclude>
+    <ClInclude Include="src\anim\rnd\res\font.h">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClInclude>
+    <ClInclude Include="src\anim\rnd\res\target.h">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClInclude>
+    <ClInclude Include="src\anim\rnd\res\light.h">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClInclude>
+    <ClInclude Include="src\anim\rnd\res\resource.h">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dae\parser\parser.h">
+      <Filter>Исходные файлы\XML\Parse/Scan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dae\parser\scanner.h">
+      <Filter>Исходные файлы\XML\Parse/Scan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dae\xml\xml.h">
+      <Filter>Исходные файлы\XML</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dae\dae.h">
+      <Filter>Исходные файлы\XML</Filter>
+    </ClInclude>
+    <ClInclude Include="src\anim\rnd\res\model.h">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClInclude>
+    <ClInclude Include="src\anim\rnd\res\buffer.h">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mzgl.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\win.cpp">
+      <Filter>Исходные файлы\Win</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\win_msg.cpp">
+      <Filter>Исходные файлы\Win</Filter>
+    </ClCompile>
+    <ClCompile Include="src\anim\anim.cpp">
+      <Filter>Исходные файлы\Anim</Filter>
+    </ClCompile>
+    <ClCompile Include="src\anim\rnd\render.cpp">
+      <Filter>Исходные файлы\Anim\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\anim\rnd\res\material.cpp">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClCompile>
+    <ClCompile Include="src\anim\rnd\res\mtl_pattern.cpp">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClCompile>
+    <ClCompile Include="src\anim\rnd\res\shader.cpp">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClCompile>
+    <ClCompile Include="src\units\test_unit.cpp">
+      <Filter>Исходные файлы\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="src\anim\rnd\res\texture.cpp">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClCompile>
+    <ClCompile Include="src\units\floor.cpp">
+      <Filter>Исходные файлы\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="src\units\skybox.cpp">
+      <Filter>Исходные файлы\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="src\units\control.cpp">
+      <Filter>Исходные файлы\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="src\anim\rnd\res\font.cpp">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClCompile>
+    <ClCompile Include="src\anim\rnd\res\target.cpp">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClCompile>
+    <ClCompile Include="src\anim\rnd\res\light.cpp">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClCompile>
+    <ClCompile Include="src\units\model.cpp">
+      <Filter>Исходные файлы\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="src\anim\rnd\res\model_dae.cpp">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
