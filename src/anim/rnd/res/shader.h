@@ -29,17 +29,21 @@ namespace mzgl
   public:
     /* Shader filename */
     std::string Name;
-    /* Shader program ID */
-    INT ProgId;
     DBL ReloadTime;
+
+    VkShaderModule vertShaderModule;
+    VkShaderModule fragShaderModule;
+    VkPipelineShaderStageCreateInfo vertShaderStageInfo {};
+    VkPipelineShaderStageCreateInfo fragShaderStageInfo {};
+    VkPipelineShaderStageCreateInfo shaderStages[2];
     
     /* Shader default constructor */
-    shader( VOID ) : Name {}, ProgId {}, ReloadTime(0)
+    shader( VOID ) : Name {}, ReloadTime(0)
     {
     } /* End of 'shader' function */
 
     /* Shader constructor by name of shader */
-    shader( const std::string &ShdName ) : Name(ShdName), ProgId(0), ReloadTime(0)
+    shader( const std::string &ShdName ) : Name(ShdName), ReloadTime(0)
     {
     } /* End of 'shader' function */
  
@@ -60,7 +64,9 @@ namespace mzgl
      * RETURNS:
      *   (std::string) load text.
      */
-    std::string LoadTextFile( const std::string &FileName );
+    std::vector<CHAR> LoadTextFile( const std::string &FileName );
+
+    VkShaderModule createShaderModule( const std::vector<char> &code );
     
     /* Load shader function.
      * ARGUMENTS: None.

@@ -616,14 +616,17 @@ VOID mzgl::render::Init(VOID)
   SurfaceInit();
   SwapchainInit();
   RenderPassInit();
+
+  Pipeline = PipelineCreate("triangle");
+
   FrameBuffersInit();
   QueueInit();
   CommandPoolInit();
   CommandBufferInit();
   FenceInit();
 
-  Trg = TrgCreate("FBO");
-  Lgh = LghCreate("Shadows");
+  //Trg = TrgCreate("FBO");
+  //Lgh = LghCreate("Shadows");
 
   IsInit = TRUE;
 } /* End of 'mzgl::render::Init' function */
@@ -639,6 +642,9 @@ VOID mzgl::render::Close(VOID)
   CommandPoolClose();
   QueueClose();
   FrameBuffersClose();
+
+  PipelineFree(Pipeline);
+
   RenderPassClose();
   SwapchainClose();
   SurfaceClose();
@@ -664,7 +670,7 @@ VOID mzgl::render::Resize(INT NewW, INT NewH)
   Camera.FrameH = NewH;
   Camera.FrameW = NewW;
 
-  Trg->TargetResize(NewW, NewH);
+  //Trg->TargetResize(NewW, NewH);
   /* Reset projection */
   Camera.ProjSet();
 
@@ -752,6 +758,26 @@ VOID mzgl::render::CommandBufferStart( VOID )
     &Info,                     // Информация начала.
     VK_SUBPASS_CONTENTS_INLINE // Тип контента подпрохода
   );
+
+  vkCmdBindPipeline(CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, Pipeline->Pipeline);
+
+  VkViewport viewport{};
+  viewport.x = 0.0f;
+  viewport.y = 0.0f;
+  viewport.width = static_cast<float>(SwapChainExtent.width);
+  viewport.height = static_cast<float>(SwapChainExtent.height);
+  viewport.minDepth = 0.0f;
+  viewport.maxDepth = 1.0f;
+  vkCmdSetViewport(CommandBuffer, 0, 1, &viewport);
+  
+  VkRect2D scissor{};
+  scissor.offset = {0, 0};
+  scissor.extent = SwapChainExtent;
+  vkCmdSetScissor(CommandBuffer, 0, 1, &scissor);
+  
+  /* NEED TO REPLACE IN DRAW FUNCTION */
+  vkCmdDraw(CommandBuffer, 3, 1, 0, 0);
+  /* NEED TO REPLACE IN DRAW FUNCTION */
 }
 
 VOID mzgl::render::CommandBufferEnd( VOID )
@@ -811,7 +837,7 @@ VOID mzgl::render::FrameStart(VOID)
   PrimsToDraw.clear();
   MatrsToDraw.clear();
 
-  Trg->TargetStart();
+ // Trg->TargetStart();
 } /* End of 'mzgl::render::FrameStart' function */
 
 /* Finish render frame function.
@@ -820,7 +846,7 @@ VOID mzgl::render::FrameStart(VOID)
  */
 VOID mzgl::render::FrameEnd(VOID)
 {
-  Trg->TargetEnd();
+ // Trg->TargetEnd();
   CommandBufferEnd();
   SwapBuffers(hDC);
 } /* End of 'mzgl::render::FrameEnd' function */

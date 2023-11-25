@@ -49,7 +49,7 @@ mzgl::material & mzgl::material::Create( const std::string &MtlName, const vec3 
  */
 INT mzgl::material::Apply( VOID )
 {
-  INT prg = MtlPat->Shd->ProgId, loc;
+  INT prg = 0;//MtlPat->Shd->ProgId, loc;
 
  // glUseProgram(prg);
   if (prg == 0)

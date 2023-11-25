@@ -176,7 +176,7 @@ VOID win::CreateWin(VOID)
 
   hWnd =
     CreateWindow(WND_CLASS_NAME,
-      "MZ2 CGSG Sr' OpenGL & DAE Bones Animation", /* CGSG Jr' Summer Camp 2023 */
+      "MZ2 CGSG Sr' VULKAN", /* CGSG Jr' Summer Camp 2023 */
       WS_OVERLAPPEDWINDOW | WS_VISIBLE,
       CW_USEDEFAULT, CW_USEDEFAULT,
       CW_USEDEFAULT, CW_USEDEFAULT,

@@ -157,6 +157,7 @@
     <ClInclude Include="src\anim\rnd\res\material.h" />
     <ClInclude Include="src\anim\rnd\res\model.h" />
     <ClInclude Include="src\anim\rnd\res\mtl_pattern.h" />
+    <ClInclude Include="src\anim\rnd\res\pipeline.h" />
     <ClInclude Include="src\anim\rnd\res\primitives.h" />
     <ClInclude Include="src\anim\rnd\res\resource.h" />
     <ClInclude Include="src\anim\rnd\res\res_manager.h" />
@@ -189,6 +190,7 @@
     <ClCompile Include="src\anim\rnd\res\material.cpp" />
     <ClCompile Include="src\anim\rnd\res\model_dae.cpp" />
     <ClCompile Include="src\anim\rnd\res\mtl_pattern.cpp" />
+    <ClCompile Include="src\anim\rnd\res\pipeline.cpp" />
     <ClCompile Include="src\anim\rnd\res\shader.cpp" />
     <ClCompile Include="src\anim\rnd\res\target.cpp" />
     <ClCompile Include="src\anim\rnd\res\texture.cpp" />

@@ -144,6 +144,9 @@
     <ClInclude Include="src\anim\rnd\res\buffer.h">
       <Filter>Исходные файлы\Anim\Render\Res</Filter>
     </ClInclude>
+    <ClInclude Include="src\anim\rnd\res\pipeline.h">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -201,6 +204,9 @@
       <Filter>Исходные файлы\Units</Filter>
     </ClCompile>
     <ClCompile Include="src\anim\rnd\res\model_dae.cpp">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClCompile>
+    <ClCompile Include="src\anim\rnd\res\pipeline.cpp">
       <Filter>Исходные файлы\Anim\Render\Res</Filter>
     </ClCompile>
   </ItemGroup>

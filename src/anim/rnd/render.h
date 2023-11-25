@@ -20,6 +20,7 @@
 #include "anim/rnd/res/light.h"
 #include "anim/rnd/res/model.h"
 #include "anim/rnd/res/buffer.h"
+#include "anim/rnd/res/pipeline.h"
 
 #include "anim/input/timer.h"
 #include <string>
@@ -43,7 +44,7 @@ namespace mzgl
   class render : public timer, 
     public shader_manager, public material_pattern_manager,
     public material_manager, public primitive_manager, public texture_manager, public font_manager,
-    public target_manager, public light_manager, public model_manager, public buffer_manager
+    public target_manager, public light_manager, public model_manager, public buffer_manager, public pipeline_manager
   {
   public:
     HWND& hWnd;     // Render reference to window handle
@@ -72,6 +73,8 @@ namespace mzgl
     target *Trg;
     light *Lgh;
 
+    pipeline *Pipeline;
+
     std::vector<prim *> PrimsToDraw;
     std::vector<matr> MatrsToDraw;
     BOOL IsShading = FALSE;
@@ -83,7 +86,7 @@ namespace mzgl
     render(HWND& hNewWnd) : hWnd(hNewWnd), timer(),
       shader_manager(*this), material_pattern_manager(*this),
       material_manager(*this), primitive_manager(*this), texture_manager(*this), font_manager(*this),
-      target_manager(*this), light_manager(*this), model_manager(*this), buffer_manager(*this)
+      target_manager(*this), light_manager(*this), model_manager(*this), buffer_manager(*this), pipeline_manager(*this)
     {      
     }
     /* Render default destructor */

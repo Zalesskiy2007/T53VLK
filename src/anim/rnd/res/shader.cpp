@@ -34,14 +34,43 @@ VOID mzgl::shader::Log( const std::string &Stage, const std::string &Text )
  * RETURNS:
  *   (std::string) load text.
  */
-std::string mzgl::shader::LoadTextFile( const std::string &FileName )
+std::vector<CHAR> mzgl::shader::LoadTextFile( const std::string &FileName )
 {
-  std::string tmp = Rnd->Path;
-  std::ifstream f(Rnd->Path + FileName);
- 
-  return std::string((std::istreambuf_iterator<char>(f)),
-                      std::istreambuf_iterator<char>());
+  std::ifstream file(Rnd->Path + FileName, std::ios::ate | std::ios::binary);
+
+  if (!file.is_open()) 
+  {
+    throw std::runtime_error("failed to open file!");
+  }
+
+  size_t fileSize = (size_t) file.tellg();
+  std::vector<char> buffer(fileSize);
+
+  file.seekg(0);
+  file.read(buffer.data(), fileSize);
+
+  file.close();
+
+  return buffer;
 } /* End of 'mzgl::shader::LoadTextFile' function */
+
+VkShaderModule mzgl::shader::createShaderModule( const std::vector<char> &code ) 
+{
+  VkShaderModuleCreateInfo createInfo{};
+
+  createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+  createInfo.codeSize = code.size();
+  createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+
+  VkShaderModule shaderModule;
+
+  if (vkCreateShaderModule(Rnd->LogicalDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+  {
+    throw std::runtime_error("failed to create shader module!");
+  }
+
+  return shaderModule;
+}
 
 /* Load shader function.
  * ARGUMENTS: None.
@@ -50,98 +79,25 @@ std::string mzgl::shader::LoadTextFile( const std::string &FileName )
  */
 mzgl::shader & mzgl::shader::Load( VOID )
 {
-  //INT prg = 0, res;
-  //static CHAR Buf[30000];
-  //struct 
-  //{
-  //  std::string Name;    // Shader name
-  //  INT Type;            // Shader type
-  //  INT Id;                // Result shader Id
-  //} shds[] = 
-  //{
-  //  {"vert", gl_VERTEX_SHADER}, 
-  //  {"frag", gl_FRAGMENT_SHADER},
-  //  {"geom", gl_GEOMETRY_SHADER},
-  //  {"ctrl", gl_TESS_CONTROL_SHADER},
-  //  {"eval", gl_TESS_EVALUATION_SHADER}
-  //};
-  //INT NoofS = sizeof(shds) / sizeof(shds[0]);
-  //BOOL isok = TRUE;
-  //
-  //for (int i = 0; i < NoofS && isok; i++)
-  //{
-  //  /* Load text file */
-  //  std::string txt = LoadTextFile("/bin/shaders/" + Name + "/" + shds[i].Name + ".glsl");
-  //  if (txt.empty())
-  //  {
-  //    if (i >= 2)
-  //      continue;
-  //    Log(shds[i].Name, "Error load file");
-  //    isok = FALSE;
-  //    break;
-  //  }
-  //  /* Create shader */
-  //  if ((shds[i].Id = glCreateShader(shds[i].Type)) == 0)
-  //  {
-  //    Log(shds[i].Name, "Error shader creation");
-  //    isok = FALSE;
-  //    break;
-  //  }
-  //  /* Attach text to shader */
-  //  const CHAR *Src[] = {CommonShaderIncludes, txt.c_str()};
-  // // glShaderSource(shds[i].Id, 2, Src, nullptr);
-  //
-  //  /* Compile shader */
-  // // glCompileShader(shds[i].Id);
-  // // glGetShaderiv(shds[i].Id,// gl_COMPILE_STATUS, &res);
-  //  if (res != 1)
-  //  {
-  //   // glGetShaderInfoLog(shds[i].Id, sizeof(Buf), &res, Buf);
-  //    Log(shds[i].Name, Buf);
-  //    isok = FALSE;
-  //    break;
-  //  }
-  //}
-  ///* Create shader program */
-  //if (isok)
-  //  if ((prg =// glCreateProgram()) == 0)
-  //  {
-  //    Log("PROG", "Error program creation");
-  //    isok = FALSE;
-  //  }
-  //  else 
-  //  {
-  //    /* Attach shader to program */
-  //    for (int i = 0; i < NoofS; i++)
-  //      if (shds[i].Id != 0)
-  //       // glAttachShader(prg, shds[i].Id);
-  //    /* Link shader program */
-  //   // glLinkProgram(prg);
-  //   // glGetProgramiv(prg,// gl_LINK_STATUS, &res);
-  //    if (res != 1)
-  //    {
-  //     // glGetProgramInfoLog(prg, sizeof(Buf), &res, Buf);
-  //      Log("PROG", Buf);
-  //      isok = FALSE;
-  //    }
-  //  }
-  ///* Error in shader handle */
-  //if (!isok)
-  //{
-  //  /* Delete shaders */
-  //  for (int i = 0; i < NoofS; i++)
-  //    if (shds[i].Id != 0)
-  //    {
-  //      if (prg != 0)
-  //       // glDetachShader(prg, shds[i].Id);
-  //     // glDeleteShader(shds[i].Id);
-  //    }
-  //  /* Delete program */
-  //  if (prg != 0)
-  //   // glDeleteProgram(prg);
-  //  prg = 0;
-  //}
-  //ProgId = prg;
+  auto vertShaderCode = LoadTextFile("/bin/shaders/" + Name + "/vert.spv");
+  auto fragShaderCode = LoadTextFile("/bin/shaders/" + Name + "/frag.spv");
+
+  vertShaderModule = createShaderModule(vertShaderCode);
+  fragShaderModule = createShaderModule(fragShaderCode);
+
+  vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+  vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+  vertShaderStageInfo.module = vertShaderModule;
+  vertShaderStageInfo.pName = "main";
+
+  fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+  fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+  fragShaderStageInfo.module = fragShaderModule;
+  fragShaderStageInfo.pName = "main";
+
+  shaderStages[0] = vertShaderStageInfo;
+  shaderStages[1] = fragShaderStageInfo;
+
   return *this;
 } /* End of 'mzgl::shader::Load' function */
 
@@ -151,21 +107,8 @@ mzgl::shader & mzgl::shader::Load( VOID )
  */
 VOID mzgl::shader::Free( VOID )
 {
- // UINT shds[5] = {0};
- // INT n;
- //
- // if (ProgId == 0 || !glIsProgram(ProgId))
- //   return;
- //// glGetAttachedShaders(ProgId, 5, &n, shds);
- // /* Delete shaders */
- // for (int i = 0; i < n; i++)
- //   if (shds[i] != 0 &&// glIsShader(shds[i]))
- //   {
- //    // glDetachShader(ProgId, shds[i]);
- //    // glDeleteShader(shds[i]);
- //   }
- // /* Delete program */
- // glDeleteProgram(ProgId);
+  vkDestroyShaderModule(Rnd->LogicalDevice, fragShaderModule, nullptr);
+  vkDestroyShaderModule(Rnd->LogicalDevice, vertShaderModule, nullptr);
 } /* End of 'mzgl::shader::Free' function */
 
 /* Update shader function.
@@ -184,10 +127,6 @@ VOID mzgl::shader::Update( VOID )
 
 static const CHAR CommonShaderIncludes[] =
 R"separator(
- 
-#version 460
-  
-#define Texture0 IsTexture0123.x
  
 )separator";
 
