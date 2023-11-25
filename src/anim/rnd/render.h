@@ -26,6 +26,8 @@
 
 #include "anim/anim.h"
 
+#include <optional>
+
  /* Project namespace */
 namespace mzgl
 {
@@ -46,7 +48,24 @@ namespace mzgl
   public:
     HWND& hWnd;     // Render reference to window handle
     HDC hDC;        // Render window device context
-    HGLRC hGLRC;    // Render OpenGL context handle
+
+    VkInstance Instance;                     
+    VkDevice LogicalDevice;                      
+    VkPhysicalDevice PhysicalDevice;         
+    VkPhysicalDeviceFeatures DeviceFeatures;
+    UINT32 QueueFamilyCount;
+    VkSurfaceKHR Surface;
+    std::vector<VkImageView> SwapchainImageViews;
+    VkSwapchainKHR Swapchain;
+    UINT32 SwapchainImagesCount;
+    VkExtent2D SwapChainExtent;
+    VkRenderPass RenderPass;
+    std::vector<VkFramebuffer> FrameBuffers;
+    VkQueue Queue;
+    VkCommandPool CommandPool;
+    VkCommandBuffer CommandBuffer;
+    VkFence Fence;
+    UINT32 ImageIndex;
   public:
     camera Camera;   // Camera type
     prim_data Prim_data;  // Primitive data 
@@ -116,16 +135,73 @@ namespace mzgl
      */
     VOID Draw(const prim* Pr, const matr& World = matr().Identity());
 
-    /* Primitive load function.
-     * ARGUMENTS:
-     *   - Filename:
-     *       const CHAR *Fn;
-     *   - Material:
-     *       material *Mat;
-     * RETURNS:
-     *   (prim *) created primitive;
-     */
-    mzgl::topology::base<mzgl::vertex::std> LoadModel( const CHAR *Fn );
+    VOID InstanceInit( VOID );
+    VOID InstanceClose( VOID );
+
+    VOID PhysicalDeviceInit( VOID );
+    VOID PhysicalDeviceClose( VOID );
+
+    VOID LogicalDeviceInit( VOID );
+    VOID LogicalDeviceClose( VOID );
+
+    VOID SurfaceInit( VOID );
+    VOID SurfaceClose( VOID );
+
+    VkSwapchainKHR SwapchainInit( VOID );
+    VOID SwapchainClose( VOID );
+
+    VOID RenderPassInit( VOID );
+    VOID RenderPassClose( VOID );
+
+    VOID FrameBuffersInit( VOID );
+    VOID FrameBuffersClose( VOID );
+
+    VOID QueueInit( VOID );
+    VOID QueueClose( VOID );
+
+    VOID CommandPoolInit( VOID );
+    VOID CommandPoolClose( VOID );
+
+    VOID CommandBufferInit( VOID );
+    VOID CommandBufferClose( VOID );
+
+    VOID CommandBufferStart( VOID );
+    VOID CommandBufferEnd( VOID );
+
+    VOID FenceInit( VOID );
+    VOID FenceClose( VOID );
+
+    struct queue_family_indices
+    {
+      std::optional<UINT32> GraphicsFamily;      // Индекс семейства очередей рендеринга
+      std::optional<UINT32> PresentFamily;       // Индекс семейства очередей экранного вывода
+    };
+
+    queue_family_indices GetQueueFamilyIndices( VOID )
+    {
+      UINT32 QueueFamilyCount = 0;
+
+      vkGetPhysicalDeviceQueueFamilyProperties(PhysicalDevice, &QueueFamilyCount, nullptr);
+      std::vector<VkQueueFamilyProperties> QueueFamilyProperties {QueueFamilyCount};
+      vkGetPhysicalDeviceQueueFamilyProperties(PhysicalDevice, &QueueFamilyCount, QueueFamilyProperties.data());
+
+      queue_family_indices Indices;
+      for (UINT32 i = 0; i < QueueFamilyCount; i++)
+      {
+        // Проверка поддержки рендеринга семейством очередей
+        if ((QueueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0)
+          Indices.GraphicsFamily = i;
+      
+        // Проверка поддержки экранного вывода семейством очередей
+        VkBool32 PresentSupport = VK_FALSE;
+        vkGetPhysicalDeviceSurfaceSupportKHR(PhysicalDevice, i, Surface, &PresentSupport);
+        if (PresentSupport == VK_TRUE)
+          Indices.PresentFamily = i;
+      }
+
+      return Indices;
+    }
+
 
   }; /* End of 'render' class */
 

@@ -31,10 +31,10 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   mzgl::anim MyAnim(hInstance);
   MyAnim.CreateWin();
 
-  MyAnim << "Skybox unit";
-  MyAnim << "Control unit";
-  MyAnim << "Model unit";
-  MyAnim << "Floor unit";
+  //MyAnim << "Skybox unit";
+  //MyAnim << "Control unit";
+  //MyAnim << "Model unit";
+  //MyAnim << "Floor unit";
 
   MyAnim.Run();
 } /* End of 'WinMain' function */

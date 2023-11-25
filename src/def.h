@@ -60,18 +60,9 @@ public:
 typedef unsigned long long UINT64;
 typedef long long INT64;
 
-/* OpenGL includes */
-/*
-#define// glEW_STATIC
-#include <glew.h>
-#include <gl/gl.h>
-#include <gl/glu.h>
-
-#pragma comment(lib, "opengl32")
-#pragma comment(lib, "glu32")
-
-#include <wglew.h>
-#include <gl/wglext.h> */
+/* Vulkan includes */
+#define VK_USE_PLATFORM_WIN32_KHR
+#include <vulkan.h>
 
 /* Project namespace */
 namespace mzgl
