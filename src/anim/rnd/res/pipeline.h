@@ -19,6 +19,8 @@
 #include "../render.h"
 
 #include "shader.h"
+#include "buffer.h"
+#include "texture.h"
 
 /* Project namespace */
 namespace mzgl
@@ -33,9 +35,15 @@ namespace mzgl
     std::string Name;
 
     VkPipelineLayout pipelineLayout;
+    VkDescriptorSetLayout descriptorSetLayout;
     VkPipeline Pipeline;
 
+    VkDescriptorPool descriptorPool;
+    std::vector<VkDescriptorSet> descriptorSets;
+
     shader *s;
+    buffer *Buf;
+    texture *Img;
     
     /* pipeline default constructor */
     pipeline( VOID ) : Name {}
@@ -53,7 +61,7 @@ namespace mzgl
      */
     VOID Free( VOID );
 
-    pipeline & Create( VOID );
+    pipeline & Create( mzgl::prim_type TypeDraw );
 
   }; /* End of 'pipeline' class */
   
@@ -72,11 +80,11 @@ namespace mzgl
      * RETURNS:
      *   (pipeline *) created shader interface(pointer).
      */
-    pipeline * PipelineCreate( const std::string &ShdName )
+    pipeline * PipelineCreate( const std::string &ShdName, mzgl::prim_type TypeDraw)
     {
       pipeline *s = resource_manager::Add(pipeline(ShdName));
 
-      return &s->Create();
+      return &s->Create( TypeDraw );
     } /* End of 'ShaderCreate' function */
 
     /* Free pipeline function.

@@ -21,6 +21,7 @@
 #include "anim/rnd/res/model.h"
 #include "anim/rnd/res/buffer.h"
 #include "anim/rnd/res/pipeline.h"
+#include "anim/rnd/res/vertex_buffer.h"
 
 #include "anim/input/timer.h"
 #include <string>
@@ -36,15 +37,13 @@ namespace mzgl
   struct prim_data
   {
     matr MatrWVP;
-    matr MatrW;
-    matr MatrWInvTrans;
   }; /* End of 'prim_data' class */
 
   /* Render representation type */
   class render : public timer, 
     public shader_manager, public material_pattern_manager,
     public material_manager, public primitive_manager, public texture_manager, public font_manager,
-    public target_manager, public light_manager, public model_manager, public buffer_manager, public pipeline_manager
+    public target_manager, public light_manager, public model_manager, public buffer_manager, public pipeline_manager, public vertex_buffer_manager
   {
   public:
     HWND& hWnd;     // Render reference to window handle
@@ -67,13 +66,16 @@ namespace mzgl
     VkCommandBuffer CommandBuffer;
     VkFence Fence;
     UINT32 ImageIndex;
+
+    static const INT MAX_FRAMES_IN_FLIGHT = 2;
+
   public:
     camera Camera;   // Camera type
     prim_data Prim_data;  // Primitive data 
     target *Trg;
     light *Lgh;
 
-    pipeline *Pipeline;
+    //pipeline *Pipeline;
 
     std::vector<prim *> PrimsToDraw;
     std::vector<matr> MatrsToDraw;
@@ -86,7 +88,7 @@ namespace mzgl
     render(HWND& hNewWnd) : hWnd(hNewWnd), timer(),
       shader_manager(*this), material_pattern_manager(*this),
       material_manager(*this), primitive_manager(*this), texture_manager(*this), font_manager(*this),
-      target_manager(*this), light_manager(*this), model_manager(*this), buffer_manager(*this), pipeline_manager(*this)
+      target_manager(*this), light_manager(*this), model_manager(*this), buffer_manager(*this), pipeline_manager(*this), vertex_buffer_manager(*this)
     {      
     }
     /* Render default destructor */
@@ -101,6 +103,18 @@ namespace mzgl
      * RETURNS: None.
      */
     VOID Init(VOID);
+
+    uint32_t findMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties );
+    VOID CreateBuffer( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory );
+    VOID CopyBuffer( VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size );
+
+    VkCommandBuffer BeginSingleTimeCommands( VOID );
+    VOID EndSingleTimeCommands( VkCommandBuffer commandBuffer );
+    VOID TransitionImageLayout( VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout );
+    VOID CopyBufferToImage( VkBuffer buffer, VkImage image, uint32_t width, uint32_t height );
+
+
+    VkImageView CreateImageView( VkImage image, VkFormat format );
 
     /* Render system close (deinitialization) function.
      * ARGUMENTS: None.
@@ -136,7 +150,7 @@ namespace mzgl
      *       const matr &World;
      * RETURNS: None.
      */
-    VOID Draw(const prim* Pr, const matr& World = matr().Identity());
+    VOID Draw( const prim* Pr, const matr& World = matr().Identity());
 
     VOID InstanceInit( VOID );
     VOID InstanceClose( VOID );

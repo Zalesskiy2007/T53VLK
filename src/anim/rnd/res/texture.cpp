@@ -9,118 +9,14 @@
 #include "mzgl.h"
 #include <cstdio>
 
-/* Texture add img function.
- * ARGUMENTS:
- *   - Name:
- *       std::string Name;
- *   - Width:
- *       INT W;
- *   - Height:
- *       INT H;
- *   - Components:
- *       INT C;
- *   - Pointer to data:
- *       VOID *ptr;
- * RETURNS:
- *   (texture &) self reference.
- */
-mzgl::texture & mzgl::texture::AddImg( std::string Name, INT W, INT H, INT C, VOID *ptr )
-{
-  INT n;
-
- // glGenTextures(1, &TexId);
-  this->H = H;
-  this->W = W;
-  this->IsCubeMap = FALSE;
- // glBindTexture(GL_TEXTURE_2D, TexId);
- // glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-  
-  n = log(W > H ? W : H) / log(2);
-  n = n < 1 ? 1 : n;
-
- // glTexStorage2D(GL_TEXTURE_2D, n, C == 4 ?// gl_RGBA8 : C == 3 ?// gl_RGB8 :// gl_R8, W, H);
-
- // glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, W, H, C == 4 ?// gl_BGRA : C == 3 ?// gl_BGR :// gl_LUMINANCE ,// gl_UNSIGNED_BYTE, ptr);
-
- // glGenerateMipmap(GL_TEXTURE_2D);
-
- // glTexParameteri(GL_TEXTURE_2D,// gl_TEXTURE_MIN_FILTER,// gl_LINEAR_MIPMAP_LINEAR);
-
- // glTexParameteri(GL_TEXTURE_2D,// gl_TEXTURE_MAG_FILTER,// gl_LINEAR);
-
- // glTexParameteri(GL_TEXTURE_2D,// gl_TEXTURE_WRAP_S,// gl_REPEAT);
- // glTexParameteri(GL_TEXTURE_2D,// gl_TEXTURE_WRAP_T,// gl_REPEAT);
-
-  return *this;
-} /* End of 'AddImg' function */
-
-/* Texture add cube map function.
- * ARGUMENTS:
- *   - File name:
- *       const CHAR *FileName;
- *   - Name:
- *       std::string Name;
- * RETURNS:
- *   (texture &) self reference.
- */
-mzgl::texture & mzgl::texture::AddCubeMap( const CHAR *FileName, std::string Name )
-{
-  FILE *F;
-
-  const CHAR * f[] = {
-    "/right.g24",
-    "/left.g24",
-    "/top.g24",
-    "/bottom.g24",
-    "/front.g24",
-    "/back.g24"
-    };
- // glGenTextures(1, &TexId);
- // glBindTexture(GL_TEXTURE_CUBE_MAP, TexId);
-  for (INT i = 0; i < 6; i++)
-  {
-    CHAR Dest[200] = "";
-    strcat(Dest, FileName);
-    strcat(Dest, f[i]);
-
-    if ((F = fopen(Dest, "rb")) != NULL)
-    {                                 
-      INT w = 0, h = 0;
-      BYTE *mem;
-
-      fread(&w, 2, 1, F);
-      fread(&h, 2, 1, F);
-      this->W = w;
-      this->H = h;
-      if ((mem = (BYTE *)malloc(w * h * 3)) != NULL)
-      {
-
-        fread(mem, 3, w * h, F);
-
-       // glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
-             0,// gl_RGB, w, h,
-             0,// gl_RGB,// gl_UNSIGNED_BYTE, mem);
-
-        free(mem);
-      }
-      fclose(F);
-    }
-  }
-
- // glTexParameteri(GL_TEXTURE_CUBE_MAP,// gl_TEXTURE_MIN_FILTER,// gl_LINEAR);
- // glTexParameteri(GL_TEXTURE_CUBE_MAP,// gl_TEXTURE_MAG_FILTER,// gl_LINEAR);
- // glTexParameteri(GL_TEXTURE_CUBE_MAP,// gl_TEXTURE_WRAP_S,// gl_CLAMP_TO_EDGE);
- // glTexParameteri(GL_TEXTURE_CUBE_MAP,// gl_TEXTURE_WRAP_T,// gl_CLAMP_TO_EDGE);
- // glTexParameteri(GL_TEXTURE_CUBE_MAP,// gl_TEXTURE_WRAP_R,// gl_CLAMP_TO_EDGE);
-
-  return *this;
-} /* End of 'AddCubeMap' function */
-
 IWICImagingFactory2 *mzgl::texture::WicFactory = nullptr;
 
-std::vector<DWORD> mzgl::texture::LoadAll( std::string Name )
+std::vector<DWORD> mzgl::texture::LoadAll( std::string Name, INT *tW, INT *tH)
 {
   std::vector<DWORD> Res;
+
+  *tW = 0;
+  *tH = 0;
 
   if (WicFactory == nullptr)
   {
@@ -172,112 +68,129 @@ std::vector<DWORD> mzgl::texture::LoadAll( std::string Name )
         Frame->Release();
       }
       Decoder->Release();
+
+      *tW = fw;
+      *tH = fh;
     }
   }
 
   return Res;
 }
 
-/* Texture add from file function.
- * ARGUMENTS:
- *   - File name:
- *       const CHAR *FileName;
- *   - Name:
- *       std::string Name;
- *   - Is cube:
- *       BOOL IsCube;
- * RETURNS:
- *   (texture &) self reference.
- */
-mzgl::texture & mzgl::texture::AddFromFile( const CHAR *FileName, std::string Name, BOOL IsCube )
+VOID mzgl::texture::CreateImage( uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory )
 {
-  FILE *F;
+  VkImageCreateInfo imageInfo{};
+  imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+  imageInfo.imageType = VK_IMAGE_TYPE_2D;
+  imageInfo.extent.width = width;
+  imageInfo.extent.height = height;
+  imageInfo.extent.depth = 1;
+  imageInfo.mipLevels = 1;
+  imageInfo.arrayLayers = 1;
+  imageInfo.format = format;
+  imageInfo.tiling = tiling;
+  imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  imageInfo.usage = usage;
+  imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+  imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-  IsCubeMap = IsCube;
-  if (!IsCube)
+  if (vkCreateImage(Rnd->LogicalDevice, &imageInfo, nullptr, &image) != VK_SUCCESS)
   {
-    if ((F = fopen(FileName, "rb")) != NULL)
-    {
-      INT w = 0, h = 0;
-      BYTE *mem;
-
-      fread(&w, 2, 1, F);
-      fread(&h, 2, 1, F);
-      if ((mem = (BYTE *)malloc(w * h * 3)) != NULL)
-      {
-
-        fread(mem, 3, w * h, F);
-
-        AddImg(Name, w, h, 3, mem);
-
-        free(mem);
-      }
-      fclose(F);
-    }
+    throw std::runtime_error("failed to create image!");
   }
-  else
+
+  VkMemoryRequirements memRequirements;
+  vkGetImageMemoryRequirements(Rnd->LogicalDevice, image, &memRequirements);
+
+  VkMemoryAllocateInfo allocInfo{};
+  allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+  allocInfo.allocationSize = memRequirements.size;
+  allocInfo.memoryTypeIndex = Rnd->findMemoryType(memRequirements.memoryTypeBits, properties);
+
+  if (vkAllocateMemory(Rnd->LogicalDevice, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
   {
-    AddCubeMap(FileName, Name);
+    throw std::runtime_error("failed to allocate image memory!");
   }
-  return *this;
-} /* End of 'AddFromFile' function */
 
+  vkBindImageMemory(Rnd->LogicalDevice, image, imageMemory, 0);
+}
 
-/* Texture add from file function.
- * ARGUMENTS:
- *   - File name:
- *       const CHAR *FileName;
- *   - Name:
- *       std::string Name;
- *   - Is cube:
- *       BOOL IsCube;
- * RETURNS:
- *   (texture &) self reference.
- */
-mzgl::texture & mzgl::texture::AddFromFileAll( std::string FName, std::string Name )
+mzgl::texture & mzgl::texture::Create( VOID )
 {
-  std::vector<DWORD> mem = LoadAll(FName);
-
-  AddImg(Name, W, H, 4, mem.data());
+  CreateTextureImage();
+  CreateTextureImageView();
+  CreateTextureSampler();
 
   return *this;
-} /* End of 'AddFromFile' function */
+}
 
-/* Texture add fmt function.
- * ARGUMENTS:
- *   - Name:
- *       std::string Name;
- *   - Width:
- *       INT W;
- *   - Height:
- *       INT H;
- *   - Type:
- *       INT// glType;
- * RETURNS:
- *   (texture &) self reference.
- */
-mzgl::texture & mzgl::texture::AddFmt( std::string Name, INT W, INT H, INT glType )
+VOID mzgl::texture::CreateTextureImage( VOID )
 {
-  /* Setup OpenGL texture */
- // glGenTextures(1, &TexId);
- // glBindTexture(GL_TEXTURE_2D, TexId);
+  INT texWidth, texHeight, texChannels = 4;
+  std::vector<DWORD> pixels = LoadAll(Rnd->Path + Name, &texWidth, &texHeight);
+  VkDeviceSize imageSize = texWidth * texHeight * 4;
 
- // glTexStorage2D(GL_TEXTURE_2D, 1,// glType, W, H);
+  VkBuffer stagingBuffer;
+  VkDeviceMemory stagingBufferMemory;
+  Rnd->CreateBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
- // glTexParameteri(GL_TEXTURE_2D,// gl_TEXTURE_MIN_FILTER,// gl_NEAREST);
- // glTexParameteri(GL_TEXTURE_2D,// gl_TEXTURE_MAG_FILTER,// gl_NEAREST);
+  VOID *data;
+  vkMapMemory(Rnd->LogicalDevice, stagingBufferMemory, 0, imageSize, 0, &data);
+      memcpy(data, pixels.data(), static_cast<size_t>(imageSize));
+  vkUnmapMemory(Rnd->LogicalDevice, stagingBufferMemory);
+
+  CreateImage(texWidth, texHeight, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
+
+  Rnd->TransitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+  Rnd->CopyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+  Rnd->TransitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+  vkDestroyBuffer(Rnd->LogicalDevice, stagingBuffer, nullptr);
+  vkFreeMemory(Rnd->LogicalDevice, stagingBufferMemory, nullptr);
+}
+
+VOID mzgl::texture::CreateTextureImageView( VOID )
+{
+  textureImageView = Rnd->CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+}
+
+VOID mzgl::texture::CreateTextureSampler( VOID )
+{
+  VkSamplerCreateInfo samplerInfo{};
+  samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+  samplerInfo.magFilter = VK_FILTER_LINEAR;
+  samplerInfo.minFilter = VK_FILTER_LINEAR;
+
+  samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+  samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+  samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+
+  /* TODO
+  samplerInfo.anisotropyEnable = VK_TRUE;
+  VkPhysicalDeviceProperties properties{};
+  vkGetPhysicalDeviceProperties(Rnd->PhysicalDevice, &properties);
+  samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+  */
+
+  samplerInfo.anisotropyEnable = VK_FALSE;
+  samplerInfo.maxAnisotropy = 1.0f;
 
 
- // glTexParameteri(GL_TEXTURE_2D,// gl_TEXTURE_WRAP_S,// gl_REPEAT);
- // glTexParameteri(GL_TEXTURE_2D,// gl_TEXTURE_WRAP_T,// gl_REPEAT);
+  samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+  samplerInfo.unnormalizedCoordinates = VK_FALSE;
+  samplerInfo.compareEnable = VK_FALSE;
+  samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
 
- // glBindTexture(GL_TEXTURE_2D, 0);
+  samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+  samplerInfo.mipLodBias = 0.0f;
+  samplerInfo.minLod = 0.0f;
+  samplerInfo.maxLod = 0.0f;
 
-  this->W = W;
-  this->H = H;
-  this->IsCubeMap = FALSE;
-  return *this;
-} /* End of 'AddFmt' function */
+   if (vkCreateSampler(Rnd->LogicalDevice, &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS)
+   {
+     throw std::runtime_error("failed to create texture sampler!");
+   }
+}
 
 /* Free texture function.
  * ARGUMENTS: None.
@@ -285,6 +198,11 @@ mzgl::texture & mzgl::texture::AddFmt( std::string Name, INT W, INT H, INT glTyp
  */
 VOID mzgl::texture::Free( VOID )
 {
+  vkDestroySampler(Rnd->LogicalDevice, textureSampler, nullptr);
+  vkDestroyImageView(Rnd->LogicalDevice, textureImageView, nullptr);
+
+  vkDestroyImage(Rnd->LogicalDevice, textureImage, nullptr);
+  vkFreeMemory(Rnd->LogicalDevice, textureImageMemory, nullptr);
 } /* End of 'mzgl::texture::Free' function */
 
 /* END OF 'texture.cpp' FILE */

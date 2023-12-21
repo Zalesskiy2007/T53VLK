@@ -23,7 +23,7 @@ VOID mzgl::anim::Render(VOID)
     {
       Uni->Response(this);
     });
-  /* ... */
+
   render::FrameStart();
   Units.Walk([this]( unit *Uni )
     {

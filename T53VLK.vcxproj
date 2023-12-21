@@ -84,7 +84,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>X:\VulkanSDK\Lib;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>X:\VulkanSDK\Lib32;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -122,7 +122,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>X:\VulkanSDK\Lib;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>X:\VulkanSDK\Lib32;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -165,6 +165,7 @@
     <ClInclude Include="src\anim\rnd\res\target.h" />
     <ClInclude Include="src\anim\rnd\res\texture.h" />
     <ClInclude Include="src\anim\rnd\res\topology.h" />
+    <ClInclude Include="src\anim\rnd\res\vertex_buffer.h" />
     <ClInclude Include="src\dae\dae.h" />
     <ClInclude Include="src\dae\parser\parser.h" />
     <ClInclude Include="src\dae\parser\scanner.h" />
@@ -185,6 +186,7 @@
   <ItemGroup>
     <ClCompile Include="src\anim\anim.cpp" />
     <ClCompile Include="src\anim\rnd\render.cpp" />
+    <ClCompile Include="src\anim\rnd\res\buffer.cpp" />
     <ClCompile Include="src\anim\rnd\res\font.cpp" />
     <ClCompile Include="src\anim\rnd\res\light.cpp" />
     <ClCompile Include="src\anim\rnd\res\material.cpp" />
@@ -194,6 +196,7 @@
     <ClCompile Include="src\anim\rnd\res\shader.cpp" />
     <ClCompile Include="src\anim\rnd\res\target.cpp" />
     <ClCompile Include="src\anim\rnd\res\texture.cpp" />
+    <ClCompile Include="src\anim\rnd\res\vertex_buffer.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\mzgl.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

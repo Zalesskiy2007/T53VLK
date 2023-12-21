@@ -1,6 +1,6 @@
 #include "mzgl.h"
 
-mzgl::pipeline & mzgl::pipeline::Create( VOID )
+mzgl::pipeline & mzgl::pipeline::Create( mzgl::prim_type TypeDraw )
 {
   std::vector<VkDynamicState> dynamicStates = 
   {
@@ -16,16 +16,21 @@ mzgl::pipeline & mzgl::pipeline::Create( VOID )
 
   VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 
+  auto bindingDescription =    mzgl::vertex::std::getBindingDescription();
+  auto attributeDescriptions = mzgl::vertex::std::getAttributeDescriptions();
+
   vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-  vertexInputInfo.vertexBindingDescriptionCount = 0;
-  vertexInputInfo.pVertexBindingDescriptions = nullptr; // Optional
-  vertexInputInfo.vertexAttributeDescriptionCount = 0;
-  vertexInputInfo.pVertexAttributeDescriptions = nullptr; // Optional
+  vertexInputInfo.vertexBindingDescriptionCount = 1; // 1 -> 0 if not work
+  vertexInputInfo.pVertexBindingDescriptions = &bindingDescription; // Optional
+  vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size()); // -> 0 if not work
+  vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data(); // Optional
 
   VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
 
   inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-  inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+  inputAssembly.topology = TypeDraw == mzgl::prim_type::TRIMESH ? VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST : 
+                           TypeDraw == mzgl::prim_type::POINTS ? VK_PRIMITIVE_TOPOLOGY_POINT_LIST : 
+                           VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
   inputAssembly.primitiveRestartEnable = VK_FALSE;
 
   VkViewport viewport{};
@@ -58,8 +63,8 @@ mzgl::pipeline & mzgl::pipeline::Create( VOID )
 
   rasterizer.lineWidth = 1.0f;
 
-  rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-  rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+  rasterizer.cullMode = VK_CULL_MODE_NONE;
+  rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 
   rasterizer.depthBiasEnable = VK_FALSE;
   rasterizer.depthBiasConstantFactor = 0.0f; // Optional
@@ -97,10 +102,49 @@ mzgl::pipeline & mzgl::pipeline::Create( VOID )
   colorBlending.blendConstants[2] = 0.0f; // Optional
   colorBlending.blendConstants[3] = 0.0f; // Optional
 
+    // В данном случае указаны параметры для отключения сглаживания.
+  VkPipelineMultisampleStateCreateInfo MSCreateInfo {};
+  MSCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+  MSCreateInfo.sampleShadingEnable = VK_FALSE;                                  // При данном значении цвет пикселя
+                                                                    // определяется только сэмплом в его центре,
+                                                                    // при VK_TRUE - интерполяцией сэмплов
+                                                                    // вокруг данного пикселя.
+  
+  MSCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;                    // При данном значении мультисэмплинг выключен,
+                                                                      // при увеличении значения качество изображения
+                                                                      // повышается, но увеличивается количество
+                                                                      // ресурсов, затрачиваемых на отрисовку.
+
+  VkDescriptorSetLayoutBinding uboLayoutBinding{};
+  uboLayoutBinding.binding = 0;
+  uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  uboLayoutBinding.descriptorCount = 1;
+  uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+  uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
+
+  VkDescriptorSetLayoutBinding samplerLayoutBinding{};
+  samplerLayoutBinding.binding = 1;
+  samplerLayoutBinding.descriptorCount = 1;
+  samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  samplerLayoutBinding.pImmutableSamplers = nullptr;
+  samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+
+  std::array<VkDescriptorSetLayoutBinding, 2> bindings = {uboLayoutBinding, samplerLayoutBinding};
+  VkDescriptorSetLayoutCreateInfo layoutInfo{};
+  layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+  layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+  layoutInfo.pBindings = bindings.data();
+
+  if (vkCreateDescriptorSetLayout(Rnd->LogicalDevice, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
+  {
+    throw std::runtime_error("failed to create descriptor set layout!");
+  }
+
   VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
   pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-  pipelineLayoutInfo.setLayoutCount = 0; // Optional
-  pipelineLayoutInfo.pSetLayouts = nullptr; // Optional
+  pipelineLayoutInfo.setLayoutCount = 1; // Optional
+  pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout; // Optional
   pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
   pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
 
@@ -109,7 +153,77 @@ mzgl::pipeline & mzgl::pipeline::Create( VOID )
     throw std::runtime_error("failed to create pipeline layout!");
   }
 
-  s = Rnd->ShaderCreate("vulkan_triangle");
+  std::array<VkDescriptorPoolSize, 2> poolSizes{};
+  poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  poolSizes[0].descriptorCount = static_cast<uint32_t>(Rnd->MAX_FRAMES_IN_FLIGHT);
+  poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  poolSizes[1].descriptorCount = static_cast<uint32_t>(Rnd->MAX_FRAMES_IN_FLIGHT);
+
+  VkDescriptorPoolCreateInfo poolInfo{};
+  poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+  poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+  poolInfo.pPoolSizes = poolSizes.data();
+  poolInfo.maxSets = static_cast<uint32_t>(Rnd->MAX_FRAMES_IN_FLIGHT);
+
+  if (vkCreateDescriptorPool(Rnd->LogicalDevice, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
+  {
+    throw std::runtime_error("failed to create descriptor pool!");
+  }
+
+
+  std::vector<VkDescriptorSetLayout> layouts(Rnd->MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
+  VkDescriptorSetAllocateInfo allocInfo{};
+  allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+  allocInfo.descriptorPool = descriptorPool;
+  allocInfo.descriptorSetCount = static_cast<uint32_t>(Rnd->MAX_FRAMES_IN_FLIGHT);
+  allocInfo.pSetLayouts = layouts.data();
+
+  descriptorSets.resize(Rnd->MAX_FRAMES_IN_FLIGHT);
+  if (vkAllocateDescriptorSets(Rnd->LogicalDevice, &allocInfo, descriptorSets.data()) != VK_SUCCESS)
+  {
+    throw std::runtime_error("failed to allocate descriptor sets!");
+  }
+
+  Buf = Rnd->BufferCreate(Name, sizeof(prim_data));
+  Img = Rnd->TxtLoad("/bin/textures/" + Name);
+
+  for (size_t i = 0; i < Rnd->MAX_FRAMES_IN_FLIGHT; i++)
+  {
+
+    //todo check buffer existing
+    VkDescriptorBufferInfo bufferInfo{};
+    bufferInfo.buffer = Buf->uniformBuffers[i];
+    bufferInfo.offset = 0;
+    bufferInfo.range = Buf->Size;
+
+    //todo check image existing
+    VkDescriptorImageInfo imageInfo{};
+    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageInfo.imageView = Img->textureImageView;
+    imageInfo.sampler = Img->textureSampler;
+
+    std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
+
+    descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrites[0].dstSet = descriptorSets[i];
+    descriptorWrites[0].dstBinding = 0;
+    descriptorWrites[0].dstArrayElement = 0;
+    descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    descriptorWrites[0].descriptorCount = 1;
+    descriptorWrites[0].pBufferInfo = &bufferInfo;
+
+    descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrites[1].dstSet = descriptorSets[i];
+    descriptorWrites[1].dstBinding = 1;
+    descriptorWrites[1].dstArrayElement = 0;
+    descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    descriptorWrites[1].descriptorCount = 1;
+    descriptorWrites[1].pImageInfo = &imageInfo;
+
+    vkUpdateDescriptorSets(Rnd->LogicalDevice, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+  }
+
+  s = Rnd->ShaderCreate(Name);
 
   VkGraphicsPipelineCreateInfo PipelineCreateInfo
   {
@@ -131,7 +245,8 @@ mzgl::pipeline & mzgl::pipeline::Create( VOID )
   PipelineCreateInfo.pViewportState = &viewportState;
   PipelineCreateInfo.pInputAssemblyState = &inputAssembly;
   PipelineCreateInfo.pDepthStencilState = nullptr;
-  
+  PipelineCreateInfo.pMultisampleState = &MSCreateInfo;
+
   if (vkCreateGraphicsPipelines(Rnd->LogicalDevice, VK_NULL_HANDLE, 1, &PipelineCreateInfo, nullptr, &Pipeline) != VK_SUCCESS)
   {
     throw;
@@ -147,6 +262,16 @@ mzgl::pipeline & mzgl::pipeline::Create( VOID )
 VOID mzgl::pipeline::Free( VOID )
 {
   Rnd->ShaderFree(s);
+
+  vkDestroyDescriptorPool(Rnd->LogicalDevice, descriptorPool, nullptr);
+
+  vkDestroyDescriptorSetLayout(Rnd->LogicalDevice, descriptorSetLayout, nullptr);
+
+  vkDestroyDescriptorSetLayout(Rnd->LogicalDevice, descriptorSetLayout, nullptr);
+
   vkDestroyPipelineLayout(Rnd->LogicalDevice, pipelineLayout, nullptr);
+
+  vkDestroyDescriptorSetLayout(Rnd->LogicalDevice, descriptorSetLayout, nullptr);
+
   vkDestroyPipeline(Rnd->LogicalDevice, Pipeline, nullptr);
 } /* End of 'mzgl::pipeline::Free' function */

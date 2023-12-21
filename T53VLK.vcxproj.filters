@@ -147,6 +147,9 @@
     <ClInclude Include="src\anim\rnd\res\pipeline.h">
       <Filter>Исходные файлы\Anim\Render\Res</Filter>
     </ClInclude>
+    <ClInclude Include="src\anim\rnd\res\vertex_buffer.h">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -207,6 +210,12 @@
       <Filter>Исходные файлы\Anim\Render\Res</Filter>
     </ClCompile>
     <ClCompile Include="src\anim\rnd\res\pipeline.cpp">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClCompile>
+    <ClCompile Include="src\anim\rnd\res\vertex_buffer.cpp">
+      <Filter>Исходные файлы\Anim\Render\Res</Filter>
+    </ClCompile>
+    <ClCompile Include="src\anim\rnd\res\buffer.cpp">
       <Filter>Исходные файлы\Anim\Render\Res</Filter>
     </ClCompile>
   </ItemGroup>

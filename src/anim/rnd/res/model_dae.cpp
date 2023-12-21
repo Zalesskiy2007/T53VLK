@@ -5,17 +5,17 @@ VOID mzgl::model::DrawDAE( mzgl::anim *Ani, DBL Size )
 {
   for (auto &x : Pr)
     {
-      bufIbm->Apply();
-      bufMatr->Apply();
+      //bufIbm->Apply();
+      //bufMatr->Apply();
       Ani->Draw(x, mzgl::matr().Scale(mzgl::vec3(Size)));
     }
 }
 
 VOID mzgl::model::SetDAE( mzgl::anim *Ani )
 {
-  bufIbm = Ani->BufferCreate(Name + "Buffer IBM", 0, sizeof(mzgl::matr) * IBM.size(), IBM.data());
+  //bufIbm = Ani->BufferCreate(Name + "Buffer IBM", 0, sizeof(mzgl::matr) * IBM.size(), IBM.data());
 
-  bufMatr = Ani->BufferCreate(Name + "Buffer Matr", 1, sizeof(mzgl::matr) * MatrData.size(), MatrData.data());
+  //bufMatr = Ani->BufferCreate(Name + "Buffer Matr", 1, sizeof(mzgl::matr) * MatrData.size(), MatrData.data());
 }
 
 VOID mzgl::model::ResponseTime( DBL Time )
@@ -74,8 +74,8 @@ VOID mzgl::model::ResponseTime( DBL Time )
   }
 
   SetMatrixs();
-  bufIbm->Update(0, 0, IBM.data());
-  bufMatr->Update(0, 0, MatrData.data());
+  //bufIbm->Update(0, 0, IBM.data());
+  //bufMatr->Update(0, 0, MatrData.data());
 }
 
 VOID mzgl::model::ToDrawDAE( mzgl::anim *Ani, DBL Size )
@@ -287,7 +287,7 @@ mzgl::model & mzgl::model::LoadModelDAE( const std::string &M, mzgl::material *M
     if (t_offset != -1)
     {
       std::string path = "bin\\textures\\" + ImagePrim;
-      NewMtl->AddTexture(Rnd->TxtLoadAll(path, NewMtl->Name + "Txt"));
+      NewMtl->AddTexture(/*Rnd->TxtLoadAll(path, NewMtl->Name + "Txt")*/nullptr);
     }
 
     Prims.push_back(Rnd->PrimCreate<vertex::std>(NewMtl, topo));

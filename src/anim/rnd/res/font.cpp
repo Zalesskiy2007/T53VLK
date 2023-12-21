@@ -57,7 +57,7 @@ mzgl::font & mzgl::font::FntLoad( const CHAR *FileName, std::string Name )
   mtl = Rnd->MtlCreate(Name, vec3(0.3, 0, 0), 
                                                vec3(1, 0, 0), vec3(1, 1, 1),
                                                32, 1, MtlP);
-  texture *t = Rnd->TxtLoadImg(Name, W, H, 4, tex);
+  texture *t = nullptr;//Rnd->TxtLoadImg(Name, W, H, 4, tex);
   mtl->AddTexture(t);
   free(tex);
   this->Mtl = mtl;

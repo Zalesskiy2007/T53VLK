@@ -14,6 +14,8 @@
 #include "material.h"
 #include "topology.h"
 #include "res_manager.h"
+#include "vertex_buffer.h"
+#include "pipeline.h"
 
 #include "resource.h"
 #include "../render.h"
@@ -31,7 +33,10 @@ namespace mzgl
   private:
     prim_type Type {};  // Primitive type
     UINT VA;            // Primitive vertex array
-    UINT VBuf;          // Vertex buffer
+  public:
+    vertex_buffer *VBuf;          // Vertex buffer
+    pipeline *PL;
+  private:
     UINT IBuf;          // Index buffer
     INT NumOfElements;  // Number of elements for OpenGL
     matr Transform {};  // Primitive transformation matrix
@@ -61,37 +66,6 @@ namespace mzgl
       {
         if (!T.V.empty())
         {
-         // glGenBuffers(1, &VBuf);
-         // glGenVertexArrays(1, &VA);
-          /* Vertex data */
-         // glBindVertexArray(VA);
-          /* Active buffer */
-         // glBindBuffer(GL_ARRAY_BUFFER, VBuf);
-          /* Merge data */
-         // glBufferData(GL_ARRAY_BUFFER, sizeof(vertex) * T.V.size(), T.V.data(),// gl_STATIC_DRAW);
-          
-         // glVertexAttribPointer(0, 3,// gl_FLOAT, FALSE, sizeof(vertex),
-                                //(VOID *)0); /* position */
-         // glVertexAttribPointer(1, 2,// gl_FLOAT, FALSE, sizeof(vertex),
-                               // (VOID *)sizeof(vec3)); /* texture coordinates */
-         // glVertexAttribPointer(2, 3,// gl_FLOAT, FALSE, sizeof(vertex),
-                               // (VOID *)(sizeof(vec3) + sizeof(vec2))); /* normal */
-         // glVertexAttribPointer(3, 4,// gl_FLOAT, FALSE, sizeof(vertex),
-                               // (VOID *)(sizeof(vec3) * 2 + sizeof(vec2))); /* color */
-         // glVertexAttribPointer(4, 4,// gl_FLOAT, FALSE, sizeof(vertex),
-                              //  (VOID *)(sizeof(vec3) * 2 + sizeof(vec2) + sizeof(vec4))); /* gm */
-         // glVertexAttribPointer(5, 4,// gl_FLOAT, FALSE, sizeof(vertex),
-                              //  (VOID *)(sizeof(vec3) * 2 + sizeof(vec2) + 2 * sizeof(vec4))); /* gw */
-           
-          /* Include the necessary attributes (layout) */
-         // glEnableVertexAttribArray(0);
-         // glEnableVertexAttribArray(1);
-         // glEnableVertexAttribArray(2);
-         // glEnableVertexAttribArray(3);
-         // glEnableVertexAttribArray(4);
-         // glEnableVertexAttribArray(5);
-          /* Close vertax array */ 
-         // glBindVertexArray(0);
           }
           if (!T.I.empty())
           {

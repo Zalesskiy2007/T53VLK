@@ -57,9 +57,8 @@ namespace mzgl
       LARGE_INTEGER t;
 
       QueryPerformanceCounter(&t);
-      /*// global time */
-     // globalTime = (DBL)(t.QuadPart - StartTime) / TimePerSec;
-     // globalDeltaTime = (DBL)(t.QuadPart - OldTime) / TimePerSec;
+      GlobalTime = (DBL)(t.QuadPart - StartTime) / TimePerSec;
+      GlobalDeltaTime = (DBL)(t.QuadPart - OldTime) / TimePerSec;
       /* Time with pause */
       if (IsPause)
       {
@@ -68,7 +67,7 @@ namespace mzgl
       }
       else
       {
-        DeltaTime =// globalDeltaTime;
+        DeltaTime = GlobalDeltaTime;
         Time = (DBL)(t.QuadPart - PauseTime - StartTime) / TimePerSec;
       }
       /* FPS */

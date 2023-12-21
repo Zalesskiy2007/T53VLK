@@ -36,6 +36,7 @@
 #include "anim/rnd/res/model.h"
 #include "anim/rnd/res/buffer.h"
 #include "anim/rnd/res/pipeline.h"
+#include "anim/rnd/res/vertex_buffer.h"
 
 #include "dae/dae.h"
 #include <iostream>

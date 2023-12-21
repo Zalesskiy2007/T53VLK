@@ -18,6 +18,7 @@
 #include "../render.h"
 
 #include <iostream>
+#include <vector>
 
 /* Project namespace */
 namespace mzgl
@@ -29,9 +30,11 @@ namespace mzgl
   public:
     std::string Name {};
 
-    INT Size {};
-    UINT Id {};
-    UINT BindPoint {};
+    std::vector<VkBuffer> uniformBuffers;
+    std::vector<VkDeviceMemory> uniformBuffersMemory;
+    std::vector<VOID *> uniformBuffersMapped;
+
+    uint32_t Size;
 
     buffer( std::string &N )
     {
@@ -44,42 +47,7 @@ namespace mzgl
     } /* End of 'font' function */
 
     
-    buffer & Create( UINT BindP, INT BufferSize, VOID *BufferBits )
-    {
-     // glGenBuffers(1, &Id);
-     // glBindBuffer(GL_SHADER_STORAGE_BUFFER, Id);
-     // glBufferData(GL_SHADER_STORAGE_BUFFER, BufferSize, nullptr,// gl_DYNAMIC_COPY);
-
-      if (BufferBits != nullptr)
-       // glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, BufferSize, BufferBits);
-     // glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-      Size = BufferSize;
-      this->BindPoint = BindP;
-
-      return *this;
-    }
-
-    VOID Update( INT BlockOffset, INT BufferSize, VOID *BufferBits )
-    {
-      if (BlockOffset < 0)
-        BlockOffset = 0;
-
-      if (BlockOffset == 0 && BufferSize == 0)
-        BufferSize = Size;
-
-      if (BlockOffset + BufferSize >= Size)
-        BufferSize = Size - BlockOffset;
-
-     // glBindBuffer(GL_SHADER_STORAGE_BUFFER, Id);
-     // glBufferSubData(GL_SHADER_STORAGE_BUFFER, BlockOffset, BufferSize, BufferBits);
-     // glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-    }
-
-    VOID Apply( VOID )
-    {
-     // glBindBufferBase(GL_SHADER_STORAGE_BUFFER, BindPoint, Id);
-    }
+    buffer & Create( uint32_t bufferSize );
         
     /* Free font function.
      * ARGUMENTS: None.
@@ -98,14 +66,12 @@ namespace mzgl
     } /* End of 'font_manager' function */
 
 
-    buffer * BufferCreate( std::string Name, UINT BindP, INT BufferSize, VOID *Bits )
+    buffer * BufferCreate( std::string Name, uint32_t bufferSize )
     {
       buffer * buf = resource_manager::Add(buffer(Name));
 
-      return &buf->Create(BindP, BufferSize, Bits);
-    }
-
-    
+      return &buf->Create(bufferSize);
+    }    
 
     /* Free font function.
      * ARGUMENTS:

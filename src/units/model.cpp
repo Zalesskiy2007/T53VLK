@@ -29,8 +29,8 @@ public:
 
 
     /* WORKING IF MESH IS <TRIANGLES> TAG, NOT WORKING IF <POLYLIST> TAG */
-    mod = MyAnim->ModelCreate("bin/models/ZebraLOD1.dae", "Test_Name", Mtl);
-    mod->SetDAE(MyAnim);
+    mod = nullptr;//MyAnim->ModelCreate("bin/models/ZebraLOD1.dae", "Test_Name", Mtl);
+    //mod->SetDAE(MyAnim);
 
     Size = 0.05;
 
@@ -108,10 +108,10 @@ public:
    */
   VOID Render(mzgl::anim* Ani) override
   {
-    if (NeedToDraw)
-      mod->DrawDAE(Ani, Size);
-    else
-      mod->DrawJoints(Node, Ani, mzgl::matr().Scale(mzgl::vec3(Size)));
+    if (NeedToDraw)       ;
+      //mod->DrawDAE(Ani, Size);
+    else                 ;
+     // mod->DrawJoints(Node, Ani, mzgl::matr().Scale(mzgl::vec3(Size)));
 
   } /* End of 'Render' function */
 
@@ -123,7 +123,7 @@ public:
    */
   VOID Response(mzgl::anim* Ani) override
   {
-    mod->ResponseTime(Ani->Time);
+    //mod->ResponseTime(Ani->Time);
 
     if (Ani->KeysClick['Q'] || Ani->KeysClick['q'])
       NeedToDraw = !NeedToDraw;
@@ -131,7 +131,7 @@ public:
 
   VOID ToDraw( mzgl::anim *Ani ) override
   {
-    mod->ToDrawDAE(Ani, Size);
+    //mod->ToDrawDAE(Ani, Size);
   }
 
 }; /* End of 'model_unit' class */

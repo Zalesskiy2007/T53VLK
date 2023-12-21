@@ -16,65 +16,45 @@ public:
   /* Test unit constructor */
   test_unit(mzgl::anim *MyAnim)
   {
-    mzgl::material_pattern *MtlP = MyAnim->MtlPatCreate("TestMtlP", 16, "default");
-    mzgl::material *Mtl = MyAnim->MtlCreate("TestMtl", mzgl::vec3(0.3, 0, 0), 
-                                                                    mzgl::vec3(1, 0, 0), mzgl::vec3(1, 1, 1),
-                                                                    32, 1, MtlP);
+    //mzgl::material_pattern *MtlP = MyAnim->MtlPatCreate("TestMtlP", 16, "default");
+    //mzgl::material *Mtl = MyAnim->MtlCreate("TestMtl", mzgl::vec3(0.3, 0, 0), 
+                            //                                        mzgl::vec3(1, 0, 0), mzgl::vec3(1, 1, 1),
+                             //                                       32, 1, MtlP);
     mzgl::topology::base<mzgl::vertex::std> topo;
-    topo.Type = mzgl::prim_type::TRIMESH;
+    topo.Type = mzgl::prim_type::TRIMESH; // WORKS!!!
     mzgl::vertex::std P[8];
-    P[0].P = mzgl::vec3(-1, 1, -1);
+
+    P[0].P = mzgl::vec3(10, 0, 10);
     P[0].C = mzgl::vec4(1, 1, 1, 1);
     P[0].N = mzgl::vec3(0, 1, 0);
     P[0].T = mzgl::vec2(0, 0);
     topo.V.push_back(P[0]);
-    P[1].P = mzgl::vec3(1, 1, -1);
+
+    P[1].P = mzgl::vec3(10, 0, -10);
     P[1].C = mzgl::vec4(1, 1, 0, 1);
     P[1].N = mzgl::vec3(0, 1, 0);
-    P[1].T = mzgl::vec2(0, 1);
+    P[1].T = mzgl::vec2(1, 0);
     topo.V.push_back(P[1]);
-    P[2].P = mzgl::vec3(1, -1, -1);
+
+    P[2].P = mzgl::vec3(-10, 0, -10);
     P[2].C = mzgl::vec4(1, 0, 1, 1);
     P[2].N = mzgl::vec3(0, 1, 0);
-    P[2].T = mzgl::vec2(1, 0);
+    P[2].T = mzgl::vec2(1, 1);
     topo.V.push_back(P[2]);
-    P[3].P = mzgl::vec3(-1, -1, -1);
+
+    P[3].P = mzgl::vec3(-10, 0, 10);
     P[3].C = mzgl::vec4(1, 0, 0, 1);
     P[3].N = mzgl::vec3(0, 1, 0);
-    P[3].T = mzgl::vec2(1, 1);
+    P[3].T = mzgl::vec2(0, 1);
     topo.V.push_back(P[3]);
-    P[4].P = mzgl::vec3(-1, 1, 1);
-    P[4].C = mzgl::vec4(0, 1, 1, 1);
-    P[4].N = mzgl::vec3(0, 1, 0);
-    topo.V.push_back(P[4]);
-    P[5].P = mzgl::vec3(1, 1, 1);
-    P[5].C = mzgl::vec4(0, 1, 0, 1);
-    P[5].N = mzgl::vec3(0, 1, 0);
-    topo.V.push_back(P[5]);
-    P[6].P = mzgl::vec3(1, -1, 1);
-    P[6].C = mzgl::vec4(0, 0, 1, 1);
-    P[6].N = mzgl::vec3(0, 1, 0);
-    topo.V.push_back(P[6]);
-    P[7].P = mzgl::vec3(-1, -1, 1);
-    P[7].C = mzgl::vec4(0, 0, 0, 1);
-    P[7].N = mzgl::vec3(0, 1, 0);
-    topo.V.push_back(P[7]);
 
-    topo.I = {
-         0, 1, 2,
-         0, 2, 3,
-         2, 1, 5,
-         2, 5, 6,
-         3, 2, 6,
-         3, 6, 7,
-         0, 3, 7,
-         0, 7, 4,
-         1, 0, 4,
-         1, 4, 5,
-         6, 5, 4,
-         6, 4, 7};
+    topo.I = {0, 1, 2, 2, 3, 0};
 
-    pr = MyAnim->PrimCreate<mzgl::vertex::std>(Mtl, topo);
+    pr = MyAnim->PrimCreate<mzgl::vertex::std>(nullptr, topo);
+    pr->VBuf = MyAnim->VertexBufferCreate("TEST_UNIT_VB", topo.V, topo.I);  // NEED TO REPLACE IN PRIMCREATE
+    pr->PL = MyAnim->PipelineCreate("vulkan_triangle.jpg", topo.Type);          // NEED TO REPLACE IN PRIMCREATE
+    // AND ALSO DELETE PIPELINE WITH VERTEX BUFFER
+
   } /* End of 'test_unit' constructor */
 
   /* Virtual render function.
@@ -85,7 +65,7 @@ public:
    */
   VOID Render(mzgl::anim* Ani) override
   {
-    Ani->Draw(pr, mzgl::matr().RotateY(sin(Ani->Time * 2) * 300));
+    Ani->Draw(pr, mzgl::matr().RotateY(sin(Ani->Time) * 0));
   } /* End of 'Render' function */
 
   /* Virtual response function.

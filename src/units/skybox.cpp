@@ -20,7 +20,7 @@ public:
     mzgl::material *Mtl = MyAnim->MtlCreate("SkyMtl", mzgl::vec3(0.3, 0, 0), 
                                                                     mzgl::vec3(1, 0, 0), mzgl::vec3(1, 1, 1),
                                                                     32, 1, MtlP);
-    mzgl::texture *Txt = MyAnim->TxtLoad("bin/textures/sky2", "SkyTxt", TRUE);
+    mzgl::texture *Txt = nullptr;//MyAnim->TxtLoad("bin/textures/sky2", "SkyTxt", TRUE);
     Mtl->AddTexture(Txt);
     mzgl::topology::base<mzgl::vertex::std> topo;
     topo.Type = mzgl::prim_type::TRIMESH;

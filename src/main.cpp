@@ -26,15 +26,14 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 {                                        
   SetDbgMemHooks();
 
-  /* FIX THAT GBuffers DONT RECOGNIZE DATA IN ALPHA CHANNEL */
-
   mzgl::anim MyAnim(hInstance);
   MyAnim.CreateWin();
 
   //MyAnim << "Skybox unit";
-  //MyAnim << "Control unit";
+  MyAnim << "Control unit";
   //MyAnim << "Model unit";
   //MyAnim << "Floor unit";
+  MyAnim << "Test unit";
 
   MyAnim.Run();
 } /* End of 'WinMain' function */

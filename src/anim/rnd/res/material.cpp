@@ -62,7 +62,7 @@ INT mzgl::material::Apply( VOID )
   //if ((loc = glGetUniformLocation(prg, "MtlKsPh")) != -1)
    // glUniform4fv(loc, 1, &MtlData.KsPh[0]);
 
-  if (MtlData.Tex[0] != nullptr && MtlData.Tex[0]->IsCubeMap)
+  if (MtlData.Tex[0] != nullptr)
   {
    // glActiveTexture(GL_TEXTURE0);
    // glBindTexture(GL_TEXTURE_CUBE_MAP, MtlData.Tex[0]->TexId);

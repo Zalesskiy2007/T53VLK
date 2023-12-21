@@ -13,6 +13,202 @@
 
 #pragma comment(lib, "vulkan-1.lib")
 
+uint32_t mzgl::render::findMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties )
+{
+  VkPhysicalDeviceMemoryProperties memProperties;
+  vkGetPhysicalDeviceMemoryProperties(PhysicalDevice, &memProperties);
+
+  for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+    if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+      return i;
+
+  throw std::runtime_error("failed to find suitable memory type!");
+}
+
+VOID mzgl::render::CreateBuffer( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory )
+{
+  VkBufferCreateInfo bufferInfo{};
+  bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+  bufferInfo.size = size;
+  bufferInfo.usage = usage;
+  bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+  if (vkCreateBuffer(LogicalDevice, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
+      throw std::runtime_error("failed to create buffer!");
+  }
+
+  VkMemoryRequirements memRequirements;
+  vkGetBufferMemoryRequirements(LogicalDevice, buffer, &memRequirements);
+
+  VkMemoryAllocateInfo allocInfo{};
+  allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+  allocInfo.allocationSize = memRequirements.size;
+  allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
+
+  if (vkAllocateMemory(LogicalDevice, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
+      throw std::runtime_error("failed to allocate buffer memory!");
+  }
+
+  vkBindBufferMemory(LogicalDevice, buffer, bufferMemory, 0);
+}
+
+VOID mzgl::render::CopyBuffer( VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size )
+{
+  VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
+
+  VkBufferCopy copyRegion{};
+  copyRegion.size = size;
+  vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+  EndSingleTimeCommands(commandBuffer);
+}
+
+VkCommandBuffer mzgl::render::BeginSingleTimeCommands( VOID )
+{
+  VkCommandBufferAllocateInfo allocInfo{};
+  allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+  allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+  allocInfo.commandPool = CommandPool;
+  allocInfo.commandBufferCount = 1;
+
+  VkCommandBuffer commandBuffer;
+  vkAllocateCommandBuffers(LogicalDevice, &allocInfo, &commandBuffer);
+
+  VkCommandBufferBeginInfo beginInfo{};
+  beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+  beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+  vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+  return commandBuffer;
+}
+
+VOID mzgl::render::EndSingleTimeCommands( VkCommandBuffer commandBuffer )
+{
+  vkEndCommandBuffer(commandBuffer);
+
+  VkSubmitInfo submitInfo{};
+  submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+  submitInfo.commandBufferCount = 1;
+  submitInfo.pCommandBuffers = &commandBuffer;
+
+  vkQueueSubmit(Queue, 1, &submitInfo, VK_NULL_HANDLE);
+  vkQueueWaitIdle(Queue);
+
+  vkFreeCommandBuffers(LogicalDevice, CommandPool, 1, &commandBuffer);
+}
+
+VkImageView mzgl::render::CreateImageView( VkImage image, VkFormat format )
+{
+  VkImageViewCreateInfo viewInfo{};
+
+  viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+  viewInfo.image = image;
+  viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+  viewInfo.format = format;
+  viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  viewInfo.subresourceRange.baseMipLevel = 0;
+  viewInfo.subresourceRange.levelCount = 1;
+  viewInfo.subresourceRange.baseArrayLayer = 0;
+  viewInfo.subresourceRange.layerCount = 1;
+
+  VkImageView imageView;
+  if (vkCreateImageView(LogicalDevice, &viewInfo, nullptr, &imageView) != VK_SUCCESS)
+  {
+    throw std::runtime_error("failed to create texture image view!");
+  }
+
+  return imageView;
+}
+
+VOID mzgl::render::TransitionImageLayout( VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout )
+{
+  VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
+
+  VkImageMemoryBarrier barrier{};
+  barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+  barrier.oldLayout = oldLayout;
+  barrier.newLayout = newLayout;
+
+  barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+  barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+  barrier.image = image;
+  barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  barrier.subresourceRange.baseMipLevel = 0;
+  barrier.subresourceRange.levelCount = 1;
+  barrier.subresourceRange.baseArrayLayer = 0;
+  barrier.subresourceRange.layerCount = 1;
+
+  VkPipelineStageFlags sourceStage;
+  VkPipelineStageFlags destinationStage;
+  
+  if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+  {
+    barrier.srcAccessMask = 0;
+    barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+  
+    sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+    destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+  }
+  else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+  {
+    barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+  
+    sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+    destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+  }
+  else
+  {
+    throw std::invalid_argument("unsupported layout transition!");
+  }
+
+  vkCmdPipelineBarrier(
+      commandBuffer,
+      sourceStage, destinationStage,
+      0,
+      0, nullptr,
+      0, nullptr,
+      1, &barrier
+  );
+
+  EndSingleTimeCommands(commandBuffer);
+}
+
+VOID mzgl::render::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
+{
+  VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
+
+  VkBufferImageCopy region{};
+  region.bufferOffset = 0;
+  region.bufferRowLength = 0;
+  region.bufferImageHeight = 0;
+
+  region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  region.imageSubresource.mipLevel = 0;
+  region.imageSubresource.baseArrayLayer = 0;
+  region.imageSubresource.layerCount = 1;
+
+  region.imageOffset = {0, 0, 0};
+  region.imageExtent = {
+      width,
+      height,
+      1
+  };
+
+  vkCmdCopyBufferToImage(
+      commandBuffer,
+      buffer,
+      image,
+      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+      1,
+      &region
+  );
+
+  EndSingleTimeCommands(commandBuffer);
+}
+
 VOID mzgl::render::InstanceInit( VOID )
 {
   // Informatin structure of application.
@@ -21,7 +217,7 @@ VOID mzgl::render::InstanceInit( VOID )
     .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
     .pApplicationName = "MZ2 Vulkan Project",
     .applicationVersion = 1,
-    .apiVersion = VK_MAKE_VERSION(1, 0, 0),   // version of VulkanAPI.
+    .apiVersion = VK_MAKE_VERSION(1, 1, 0),   // version of VulkanAPI.
   };
   
   // Information structie for instance creating.
@@ -605,7 +801,7 @@ VOID mzgl::render::Init(VOID)
   Camera.FrameW = 1424;
   Camera.FrameH = 720;
 
-  Camera.CamSet(vec3(0, 10, 20), vec3(0), vec3(0, 1, 0));
+  Camera.CamSet(vec3(8, 8, 8), vec3(0), vec3(0, 1, 0));
   CHAR Buf[_MAX_PATH];
   GetCurrentDirectory(sizeof(Buf), Buf);
   Path = Buf;
@@ -617,7 +813,7 @@ VOID mzgl::render::Init(VOID)
   SwapchainInit();
   RenderPassInit();
 
-  Pipeline = PipelineCreate("triangle");
+  //Pipeline = PipelineCreate("vulkan_triangle");
 
   FrameBuffersInit();
   QueueInit();
@@ -643,7 +839,7 @@ VOID mzgl::render::Close(VOID)
   QueueClose();
   FrameBuffersClose();
 
-  PipelineFree(Pipeline);
+  //PipelineFree(Pipeline);
 
   RenderPassClose();
   SwapchainClose();
@@ -759,8 +955,6 @@ VOID mzgl::render::CommandBufferStart( VOID )
     VK_SUBPASS_CONTENTS_INLINE // Тип контента подпрохода
   );
 
-  vkCmdBindPipeline(CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, Pipeline->Pipeline);
-
   VkViewport viewport{};
   viewport.x = 0.0f;
   viewport.y = 0.0f;
@@ -774,10 +968,6 @@ VOID mzgl::render::CommandBufferStart( VOID )
   scissor.offset = {0, 0};
   scissor.extent = SwapChainExtent;
   vkCmdSetScissor(CommandBuffer, 0, 1, &scissor);
-  
-  /* NEED TO REPLACE IN DRAW FUNCTION */
-  vkCmdDraw(CommandBuffer, 3, 1, 0, 0);
-  /* NEED TO REPLACE IN DRAW FUNCTION */
 }
 
 VOID mzgl::render::CommandBufferEnd( VOID )
@@ -833,6 +1023,12 @@ VOID mzgl::render::CommandBufferEnd( VOID )
 VOID mzgl::render::FrameStart(VOID)
 {
   //glClear(GL_COLOR_BUFFER_BIT |// gl_DEPTH_BUFFER_BIT);
+
+  static char Buf[1000];
+
+  sprintf(Buf, "MZ2 CGSG Sr' VULKAN | FPS: %lf", FPS);
+  SetWindowText(hWnd, Buf);
+
   CommandBufferStart();
   PrimsToDraw.clear();
   MatrsToDraw.clear();
@@ -859,9 +1055,9 @@ VOID mzgl::render::FrameEnd(VOID)
  *       const matr &World;
  * RETURNS: None.
  */
-VOID mzgl::render::Draw(const prim* Pr, const matr& World)
+VOID mzgl::render::Draw( const prim* Pr, const matr& World )
 {
-  Pr->Mtl->MtlPat->Shd->Update();
+  //Pr->Mtl->MtlPat->Shd->Update();
   matr
     w = Pr->Transform * World,
     winw = w.Inverse().Transpose(),
@@ -869,59 +1065,29 @@ VOID mzgl::render::Draw(const prim* Pr, const matr& World)
     wv = Camera.MatrView,
     wvp = w * Camera.MatrVP;
 
-  //INT
-  //  RndProgId, loc,
-  // // gl_prim_type = Pr->Type == prim_type::LINES ?// gl_LINES :
-  //  Pr->Type == prim_type::TRIMESH ?// gl_TRIANGLES :
-  //  Pr->Type == prim_type::STRIP ?// gl_TRIANGLE_STRIP :
-  // // gl_POINTS;
-  //Prim_data.MatrWVP = wvp;
-  //Prim_data.MatrW = w;
-  //Prim_data.MatrWInvTrans = winw;
-  //
-  //RndProgId = Pr->Mtl->Apply();
-  //if ((loc =// glGetUniformLocation(RndProgId, "MatrWvp")) != -1)
-  // // glUniformMatrix4fv(loc, 1,// gl_FALSE, wvp.A[0]);
-  //if ((loc =// glGetUniformLocation(RndProgId, "MatrWorld")) != -1)
-  // // glUniformMatrix4fv(loc, 1,// gl_FALSE, w.A[0]);
-  //if ((loc =// glGetUniformLocation(RndProgId, "MatrTrans")) != -1)
-  // // glUniformMatrix4fv(loc, 1,// gl_FALSE, Pr->Transform.A[0]);
-  //if ((loc =// glGetUniformLocation(RndProgId, "MatrShadow")) != -1)
-  // // glUniformMatrix4fv(loc, 1,// gl_FALSE, Lgh->ShadowMatr.A[0]);
-  //if ((loc =// glGetUniformLocation(RndProgId, "CamLoc")) != -1)
-  // // glUniform3fv(loc, 1, &Camera.Loc[0]);
-  //if ((loc =// glGetUniformLocation(RndProgId, "CamDir")) != -1)
-  // // glUniform3fv(loc, 1, &Camera.Dir[0]);
-  //if ((loc =// glGetUniformLocation(RndProgId, "CamUp")) != -1)
-  // // glUniform3fv(loc, 1, &Camera.Up[0]);
-  //if ((loc =// glGetUniformLocation(RndProgId, "CamRight")) != -1)
-  // // glUniform3fv(loc, 1, &Camera.Right[0]);
-  //if ((loc =// glGetUniformLocation(RndProgId, "LightDir")) != -1)
-  // // glUniform3fv(loc, 1, &Lgh->LightDir[0]);
-  //if ((loc =// glGetUniformLocation(RndProgId, "LightColor")) != -1)
-  // // glUniform3fv(loc, 1, &Lgh->LightColor[0]);
-  //if ((loc =// glGetUniformLocation(RndProgId, "FrameW")) != -1)
-  // // glUniform1f(loc, Camera.FrameW);
-  //if ((loc =// glGetUniformLocation(RndProgId, "FrameH")) != -1)
-  // // glUniform1f(loc, Camera.FrameH);
-  //if ((loc =// glGetUniformLocation(RndProgId, "ProjDist")) != -1)
-  // // glUniform1f(loc, Camera.ProjDist);
-  //if ((loc =// glGetUniformLocation(RndProgId, "ProjSize")) != -1)
-  // // glUniform1f(loc, Camera.ProjSize);
-  //if ((loc =// glGetUniformLocation(RndProgId, "Time")) != -1)
-  // // glUniform1f(loc, Time);
-  //
-  //glBindVertexArray(Pr->VA);
-  //if (Pr->IBuf != 0)
-  //{
-  // // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Pr->IBuf);
-  // // glDrawElements(gl_prim_type, Pr->NumOfElements,// gl_UNSIGNED_INT, nullptr);
-  // // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-  //}
-  //else
-  // // glDrawArrays(gl_prim_type, 0, Pr->NumOfElements);
-  //glBindVertexArray(0);
-  //glUseProgram(0);
+  prim_data ubo;
+
+  ubo.MatrWVP = wvp;
+  memcpy(Pr->PL->Buf->uniformBuffersMapped[ImageIndex], &ubo, sizeof(ubo));
+  // CONTROLL NOT WORKING!!!
+
+  vkCmdBindPipeline(CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, Pr->PL->Pipeline);
+
+  VkBuffer vertexBuffers[] = {Pr->VBuf->vertexBuffer};
+  VkDeviceSize offsets[] = {0};
+
+  vkCmdBindVertexBuffers(CommandBuffer, 0, 1, vertexBuffers, offsets);
+
+  if (Pr->PL->Buf->Size > 0)
+    vkCmdBindDescriptorSets(CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, Pr->PL->pipelineLayout, 0, 1, &Pr->PL->descriptorSets[ImageIndex], 0, nullptr);
+
+  if (Pr->VBuf->SizeI > 0)
+  {
+    vkCmdBindIndexBuffer(CommandBuffer, Pr->VBuf->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+    vkCmdDrawIndexed(CommandBuffer, Pr->VBuf->SizeI, 1, 0, 0, 0);
+  }
+  else
+    vkCmdDraw(CommandBuffer, Pr->VBuf->SizeV, 1, 0, 0);
 } /* End of 'mzgl::render::Draw' function */
 
 /* END OF 'render.cpp' FILE */

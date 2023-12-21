@@ -93,7 +93,7 @@ namespace mth
         ry *= (DBL)FrameH / FrameW;
 
       MatrProj =
-        matr<Type>::Frustum(-rx / 2, rx / 2, -ry / 2, ry / 2,
+        matr<Type>::Frustum(-rx / 2, rx / 2, ry / 2, -ry / 2,
           ProjDist, ProjFarClip);
       MatrVP = MatrView * MatrProj;
     } /* End of 'ProjSet' function */

@@ -30,11 +30,19 @@ namespace mzgl
   public:
     std::string Name;          // texture name
     INT W, H;
-    UINT TexId;
-    BOOL IsCubeMap;
+
+    VkImage textureImage;
+    VkDeviceMemory textureImageMemory;
+
+    VkImageView textureImageView;
+    VkSampler textureSampler;
 
     // Windows Imaging Component factory
     static IWICImagingFactory2 *WicFactory;
+
+    VOID CreateTextureImageView( VOID );
+    
+    VOID CreateTextureSampler( VOID );
 
     /* texture default constructor */
     texture( VOID )
@@ -42,83 +50,17 @@ namespace mzgl
       Name = "";
     } /* End of 'texture' function */
 
-    std::vector<DWORD> LoadAll( std::string Name );
+    std::vector<DWORD> LoadAll( std::string Name, INT *tW, INT *tH);
 
     texture( std::string &N )
     {
       Name = N;      
     } /* End of 'texture' function */
 
-    /* Texture add img function.
-     * ARGUMENTS:
-     *   - Name:
-     *       std::string Name;
-     *   - Width:
-     *       INT W;
-     *   - Height:
-     *       INT H;
-     *   - Components:
-     *       INT C;
-     *   - Pointer to data:
-     *       VOID *ptr;
-     * RETURNS:
-     *   (texture &) self reference.
-     */
-    texture & AddImg( std::string Name, INT W, INT H, INT C, VOID *ptr );
+    VOID CreateTextureImage( VOID );
+    VOID CreateImage( uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory );
 
-    /* Texture add fmt function.
-     * ARGUMENTS:
-     *   - Name:
-     *       std::string Name;
-     *   - Width:
-     *       INT W;
-     *   - Height:
-     *       INT H;
-     *   - Type:
-     *       INT// glType;
-     * RETURNS:
-     *   (texture &) self reference.
-     */
-    texture & AddFmt( std::string Name, INT W, INT H, INT glType );
-
-    /* Texture add cube map function.
-     * ARGUMENTS:
-     *   - File name:
-     *       const CHAR *FileName;
-     *   - Name:
-     *       std::string Name;
-     * RETURNS:
-     *   (texture &) self reference.
-     */
-    texture & AddCubeMap( const CHAR * FileName, std::string Name );
-
-    /* Texture add from file function.
-     * ARGUMENTS:
-     *   - File name:
-     *       const CHAR *FileName;
-     *   - Name:
-     *       std::string Name;
-     *   - Is cube:
-     *       BOOL IsCube;
-     * RETURNS:
-     *   (texture &) self reference.
-     */
-    texture & AddFromFile( const CHAR *FileName, std::string Name, BOOL IsCube );
-
-
-    /* Texture add from file function.
-     * ARGUMENTS:
-     *   - File name:
-     *       const CHAR *FileName;
-     *   - Name:
-     *       std::string Name;
-     *   - Is cube:
-     *       BOOL IsCube;
-     * RETURNS:
-     *   (texture &) self reference.
-     */
-    texture & AddFromFileAll( std::string FName, std::string Name );
-
+    texture & Create( VOID );
         
     /* Free texture function.
      * ARGUMENTS: None.
@@ -135,83 +77,13 @@ namespace mzgl
     texture_manager( render &Rnd ) : resource_manager(Rnd)
     {
     } /* End of 'font_manager' function */
-    /* Texture load function.
-     * ARGUMENTS:
-     *   - File name:
-     *       const CHAR *FileName;
-     *   - Name:
-     *       std::string Name;
-     *   - Is cube:
-     *       BOOL IsC;
-     * RETURNS:
-     *   (texture *) pointer to texture.
-     */
-    texture * TxtLoad( const CHAR *FileName, std::string Name, BOOL IsC )
+
+    texture * TxtLoad( std::string N )
     {
-      texture *t = resource_manager::Add(texture(Name));
+      texture *s = resource_manager::Add(texture(N));
 
-      return &t->AddFromFile(FileName, Name, IsC);
-    } /* End of 'TxtLoad' function */
-
-    /* Texture load function.
-     * ARGUMENTS:
-     *   - File name:
-     *       const CHAR *FileName;
-     *   - Name:
-     *       std::string Name;
-     *   - Is cube:
-     *       BOOL IsC;
-     * RETURNS:
-     *   (texture *) pointer to texture.
-     */
-    texture * TxtLoadAll( std::string FN, std::string Name )
-    {
-      texture *t = resource_manager::Add(texture(Name));
-
-      return &t->AddFromFileAll(FN, Name);
-    } /* End of 'TxtLoad' function *
-
-    /* Texture load img function.
-     * ARGUMENTS:
-     *   - Name:
-     *       std::string Name;
-     *   - Width:
-     *       INT W;
-     *   - Height:
-     *       INT H;
-     *   - Components:
-     *       INT C;
-     *   - Pointer to data:
-     *       VOID *ptr;
-     * RETURNS:
-     *   (texture *) pointer to texture.
-     */
-    texture * TxtLoadImg( std::string Name, INT W, INT H, INT C, VOID *ptr )
-    {
-      texture *t = resource_manager::Add(texture(Name));
-
-      return &t->AddImg(Name, W, H, C, ptr);
-    } /* End of 'TxtLoadImg' function */
-
-    /* Texture load fmt function.
-     * ARGUMENTS:
-     *   - Name:
-     *       std::string Name;
-     *   - Width:
-     *       INT W;
-     *   - Height:
-     *       INT H;
-     *   - Type:
-     *       INT// glType;
-     * RETURNS:
-     *   (texture *) pointer to texture.
-     */
-    texture * TxtLoadFmt( std::string Name, INT W, INT H, INT glType )
-    {
-      texture *t = resource_manager::Add(texture(Name));
-
-      return &t->AddFmt(Name, W, H, glType);
-    } /* End of 'TxtLoadFmt' function */
+      return &s->Create();
+    }
 
     /* Free texture function.
      * ARGUMENTS:

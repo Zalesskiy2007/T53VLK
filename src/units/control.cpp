@@ -16,7 +16,7 @@ public:
   /* Control constructor */
   control(mzgl::anim *MyAnim)
   {
-    fnt = MyAnim->FntCreate("bin/fonts/Book.g3df", "TestFnt");
+  //  fnt = MyAnim->FntCreate("bin/fonts/Book.g3df", "TestFnt");
     DrawMode = TRUE;
   } /* End of 'control' constructor */
 
@@ -28,12 +28,12 @@ public:
    */
   VOID Render(mzgl::anim* Ani) override
   {
-    if (!Ani->IsShading)
-    {
-      CHAR Dest[400] = "";
-      sprintf(Dest, "MZ2 FPS: %f\nQ - %s mode", Ani->FPS, DrawMode ? "bones" : "mesh");
-      fnt->FntDraw(Dest);
-    }
+    //if (!Ani->IsShading)
+    //{
+      //CHAR Dest[400] = "";
+      //sprintf(Dest, "MZ2 FPS: %f\nQ - %s mode", Ani->FPS, DrawMode ? "bones" : "mesh");
+      //fnt->FntDraw(Dest);
+   // }
   } /* End of 'Render' function */
 
   /* Virtual response function.
@@ -51,7 +51,7 @@ public:
 
     if (Ani->Keys[VK_CONTROL] && Ani->Keys['F'])
     {
-      Ani->Camera.CamSet(mzgl::vec3(0, 10, 20), mzgl::vec3(0), mzgl::vec3(0, 1, 0));
+      Ani->Camera.CamSet(mzgl::vec3(8, 8, 8), mzgl::vec3(0), mzgl::vec3(0, 1, 0));
     }
     if (Ani->Keys[VK_CONTROL])
     {
