@@ -33,6 +33,8 @@ namespace mzgl
   public:
     /* pipeline name */
     std::string Name;
+    std::string ShaderName;
+    std::string TextureName;
 
     VkPipelineLayout pipelineLayout;
     VkDescriptorSetLayout descriptorSetLayout;
@@ -41,17 +43,23 @@ namespace mzgl
     VkDescriptorPool descriptorPool;
     std::vector<VkDescriptorSet> descriptorSets;
 
-    shader *s;
-    buffer *Buf;
+    shader *Shd;
+    buffer *Buf; /* 
+                 similar like textures(images) need to do buffers:
+                  -- array(vector) of pointers to buffers(images);
+                  -- do in loop descriptor writes
+                  -- apply(update) all buffers
+                 */
+
     texture *Img;
     
     /* pipeline default constructor */
-    pipeline( VOID ) : Name {}
+    pipeline( VOID ) : Name {}, ShaderName {}, TextureName {}
     {
     } /* End of 'pipeline' function */
 
     /* pipeline constructor by name of pipeline */
-    pipeline( const std::string &ShdName ) : Name(ShdName)
+    pipeline( const std::string &CName, const std::string &TName, const std::string &ShdName ) : Name(CName), ShaderName(ShdName), TextureName(TName)
     {
     } /* End of 'pipeline' function */
 
@@ -80,9 +88,9 @@ namespace mzgl
      * RETURNS:
      *   (pipeline *) created shader interface(pointer).
      */
-    pipeline * PipelineCreate( const std::string &ShdName, mzgl::prim_type TypeDraw)
+    pipeline * PipelineCreate( const std::string &CName, const std::string &TName, const std::string &ShdName, mzgl::prim_type TypeDraw)
     {
-      pipeline *s = resource_manager::Add(pipeline(ShdName));
+      pipeline *s = resource_manager::Add(pipeline(CName, TName, ShdName));
 
       return &s->Create( TypeDraw );
     } /* End of 'ShaderCreate' function */

@@ -1,2 +1,2 @@
-C:/VulkanSDK/1.3.250.1/Bin/glslc.exe shader.vert -o vert.spv
-C:/VulkanSDK/1.3.250.1/Bin/glslc.exe shader.frag -o frag.spv
+Z:/MZ2/T53VLK/bin/shaders/glslc.exe shader.vert -o vert.spv
+Z:/MZ2/T53VLK/bin/shaders/glslc.exe shader.frag -o frag.spv

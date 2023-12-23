@@ -52,7 +52,8 @@ public:
 
     pr = MyAnim->PrimCreate<mzgl::vertex::std>(nullptr, topo);
     pr->VBuf = MyAnim->VertexBufferCreate("TEST_UNIT_VB", topo.V, topo.I);  // NEED TO REPLACE IN PRIMCREATE
-    pr->PL = MyAnim->PipelineCreate("vulkan_triangle.jpg", topo.Type);          // NEED TO REPLACE IN PRIMCREATE
+
+    pr->PL = MyAnim->PipelineCreate("TEST_UNIT_PIPELINE", "minecraft.png", "vulkan_triangle", topo.Type);          // NEED TO REPLACE IN PRIMCREATE
     // AND ALSO DELETE PIPELINE WITH VERTEX BUFFER
 
   } /* End of 'test_unit' constructor */

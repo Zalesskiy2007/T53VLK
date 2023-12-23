@@ -1,4 +1,4 @@
-#include "mzgl.h"
+ï»¿#include "mzgl.h"
 
 mzgl::pipeline & mzgl::pipeline::Create( mzgl::prim_type TypeDraw )
 {
@@ -102,18 +102,18 @@ mzgl::pipeline & mzgl::pipeline::Create( mzgl::prim_type TypeDraw )
   colorBlending.blendConstants[2] = 0.0f; // Optional
   colorBlending.blendConstants[3] = 0.0f; // Optional
 
-    // Â äàííîì ñëó÷àå óêàçàíû ïàðàìåòðû äëÿ îòêëþ÷åíèÿ ñãëàæèâàíèÿ.
+    // Ð’ Ð´Ð°Ð½Ð½Ð¾Ð¼ ÑÐ»ÑƒÑ‡Ð°Ðµ ÑƒÐºÐ°Ð·Ð°Ð½Ñ‹ Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ñ‹ Ð´Ð»Ñ Ð¾Ñ‚ÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸Ñ ÑÐ³Ð»Ð°Ð¶Ð¸Ð²Ð°Ð½Ð¸Ñ.
   VkPipelineMultisampleStateCreateInfo MSCreateInfo {};
   MSCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-  MSCreateInfo.sampleShadingEnable = VK_FALSE;                                  // Ïðè äàííîì çíà÷åíèè öâåò ïèêñåëÿ
-                                                                    // îïðåäåëÿåòñÿ òîëüêî ñýìïëîì â åãî öåíòðå,
-                                                                    // ïðè VK_TRUE - èíòåðïîëÿöèåé ñýìïëîâ
-                                                                    // âîêðóã äàííîãî ïèêñåëÿ.
+  MSCreateInfo.sampleShadingEnable = VK_FALSE;                                  // ÐŸÑ€Ð¸ Ð´Ð°Ð½Ð½Ð¾Ð¼ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ð¸ Ñ†Ð²ÐµÑ‚ Ð¿Ð¸ÐºÑÐµÐ»Ñ
+                                                                    // Ð¾Ð¿Ñ€ÐµÐ´ÐµÐ»ÑÐµÑ‚ÑÑ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ ÑÑÐ¼Ð¿Ð»Ð¾Ð¼ Ð² ÐµÐ³Ð¾ Ñ†ÐµÐ½Ñ‚Ñ€Ðµ,
+                                                                    // Ð¿Ñ€Ð¸ VK_TRUE - Ð¸Ð½Ñ‚ÐµÑ€Ð¿Ð¾Ð»ÑÑ†Ð¸ÐµÐ¹ ÑÑÐ¼Ð¿Ð»Ð¾Ð²
+                                                                    // Ð²Ð¾ÐºÑ€ÑƒÐ³ Ð´Ð°Ð½Ð½Ð¾Ð³Ð¾ Ð¿Ð¸ÐºÑÐµÐ»Ñ.
   
-  MSCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;                    // Ïðè äàííîì çíà÷åíèè ìóëüòèñýìïëèíã âûêëþ÷åí,
-                                                                      // ïðè óâåëè÷åíèè çíà÷åíèÿ êà÷åñòâî èçîáðàæåíèÿ
-                                                                      // ïîâûøàåòñÿ, íî óâåëè÷èâàåòñÿ êîëè÷åñòâî
-                                                                      // ðåñóðñîâ, çàòðà÷èâàåìûõ íà îòðèñîâêó.
+  MSCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;                    // ÐŸÑ€Ð¸ Ð´Ð°Ð½Ð½Ð¾Ð¼ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ð¸ Ð¼ÑƒÐ»ÑŒÑ‚Ð¸ÑÑÐ¼Ð¿Ð»Ð¸Ð½Ð³ Ð²Ñ‹ÐºÐ»ÑŽÑ‡ÐµÐ½,
+                                                                      // Ð¿Ñ€Ð¸ ÑƒÐ²ÐµÐ»Ð¸Ñ‡ÐµÐ½Ð¸Ð¸ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ ÐºÐ°Ñ‡ÐµÑÑ‚Ð²Ð¾ Ð¸Ð·Ð¾Ð±Ñ€Ð°Ð¶ÐµÐ½Ð¸Ñ
+                                                                      // Ð¿Ð¾Ð²Ñ‹ÑˆÐ°ÐµÑ‚ÑÑ, Ð½Ð¾ ÑƒÐ²ÐµÐ»Ð¸Ñ‡Ð¸Ð²Ð°ÐµÑ‚ÑÑ ÐºÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð¾
+                                                                      // Ñ€ÐµÑÑƒÑ€ÑÐ¾Ð², Ð·Ð°Ñ‚Ñ€Ð°Ñ‡Ð¸Ð²Ð°ÐµÐ¼Ñ‹Ñ… Ð½Ð° Ð¾Ñ‚Ñ€Ð¸ÑÐ¾Ð²ÐºÑƒ.
 
   VkDescriptorSetLayoutBinding uboLayoutBinding{};
   uboLayoutBinding.binding = 0;
@@ -184,8 +184,8 @@ mzgl::pipeline & mzgl::pipeline::Create( mzgl::prim_type TypeDraw )
     throw std::runtime_error("failed to allocate descriptor sets!");
   }
 
-  Buf = Rnd->BufferCreate(Name, sizeof(prim_data));
-  Img = Rnd->TxtLoad("/bin/textures/" + Name);
+  Buf = Rnd->BufferCreate(Name, sizeof(prim_data));   //todo
+  Img = Rnd->TxtLoad("/bin/textures/" + TextureName);        //todo
 
   for (size_t i = 0; i < Rnd->MAX_FRAMES_IN_FLIGHT; i++)
   {
@@ -223,18 +223,18 @@ mzgl::pipeline & mzgl::pipeline::Create( mzgl::prim_type TypeDraw )
     vkUpdateDescriptorSets(Rnd->LogicalDevice, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
   }
 
-  s = Rnd->ShaderCreate(Name);
+  Shd = Rnd->ShaderCreate(ShaderName); //todo
 
   VkGraphicsPipelineCreateInfo PipelineCreateInfo
   {
     .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
     .stageCount = 2,
-    .pStages = s->shaderStages,
+    .pStages = Shd->shaderStages,
     .pVertexInputState = &vertexInputInfo,
-   //...                                                   // Óêàçàòåëè íà îñòàëüíûå ðàíåå ñîçäàííûå ñòðóêòóðû.
+   //...                                                   // Ð£ÐºÐ°Ð·Ð°Ñ‚ÐµÐ»Ð¸ Ð½Ð° Ð¾ÑÑ‚Ð°Ð»ÑŒÐ½Ñ‹Ðµ Ñ€Ð°Ð½ÐµÐµ ÑÐ¾Ð·Ð´Ð°Ð½Ð½Ñ‹Ðµ ÑÑ‚Ñ€ÑƒÐºÑ‚ÑƒÑ€Ñ‹.
     .pColorBlendState = &colorBlending,
     .renderPass = Rnd->RenderPass,
-    .basePipelineHandle = VK_NULL_HANDLE,                  // Äàííûå ïîëÿ ïîçâîëÿþò ñîçäàòü pipeline íà áàçå äðóãîãî.
+    .basePipelineHandle = VK_NULL_HANDLE,                  // Ð”Ð°Ð½Ð½Ñ‹Ðµ Ð¿Ð¾Ð»Ñ Ð¿Ð¾Ð·Ð²Ð¾Ð»ÑÑŽÑ‚ ÑÐ¾Ð·Ð´Ð°Ñ‚ÑŒ pipeline Ð½Ð° Ð±Ð°Ð·Ðµ Ð´Ñ€ÑƒÐ³Ð¾Ð³Ð¾.
     .basePipelineIndex = -1,
   };
   PipelineCreateInfo.layout = pipelineLayout;
@@ -261,7 +261,7 @@ mzgl::pipeline & mzgl::pipeline::Create( mzgl::prim_type TypeDraw )
  */
 VOID mzgl::pipeline::Free( VOID )
 {
-  Rnd->ShaderFree(s);
+  Rnd->ShaderFree(Shd);
 
   vkDestroyDescriptorPool(Rnd->LogicalDevice, descriptorPool, nullptr);
 
